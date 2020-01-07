@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="PTC">
+    <title>Creo View WebGL Viewer</title>
+</head>
+<script src="js/ptc/thingview/thingview.js"></script>
+<script type="text/javascript">
+    var thingview;
+    var app;
+    var session;
+    var model1;
+    var model2;
+    var shapeScene;
+    var shapeView;
+    var structure1;
+    var structure2;
+    window.onload = function () {
+        ThingView.init("js/ptc/thingview", function () { // ThingView should only be initialised once per frame
+            // Add drag and drop support to load pvz
+            var canvas = document.getElementById("CreoViewWebGLDiv");
+            canvas.addEventListener("dragenter", dragenter, false);
+            canvas.addEventListener("dragover", dragover, false);
+            canvas.addEventListener("drop", drop, false);
+
+            console.log("Creo View WebGL Viewer is now initialised");
+            app = ThingView.CreateCVApplication("CreoViewWebGLDiv");
+            session = app.GetSession();
+            shapeScene = session.MakeShapeScene(true);
+            shapeView = shapeScene.MakeShapeView(document.getElementById("CreoViewWebGLDiv").childNodes[0].id, true);
+            structure1 = session.LoadStructureWithURL("sample-data/Brake/worldcar-brake-multi-figure.pvz", true, function (success, errors) {
+                if (success === true) {
+                    model1 = shapeScene.MakeModel();
+                    model1.LoadStructure(structure1, true, true, function (success, isStructure, errorStack) {
+                        console.log("Model(1) LoadFromURLWithCallback - success: " + success + ", isStructure: " + isStructure);
+                    });
+                } else {
+                    console.log("Failed to load structure");
+                }
+            })
+
+            structure2 = session.LoadStructureWithURL("sample-data/Blower/blower.pvs", true, function (success, errors) {
+                if (success === true) {
+                    model2 = shapeScene.MakeModel();
+                    model2.LoadStructure(structure2, true, true, function (success, isStructure, errorStack) {
+                        console.log("Model(2) LoadFromURLWithCallback - success: " + success + ", isStructure: " + isStructure);
+                    });
+                } else {
+                    console.log("Failed to load structure");
+                }
+            })
+        });
+    };
+
+    function dragenter(e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    function dragover(e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    function drop(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        var dt = e.dataTransfer;
+        if (dt.files.length !== 1)
+            return;
+        var file = dt.files[0];
+        if (file == undefined)
+            return;
+        var reader = new FileReader();
+        reader.filename = file.name;
+        reader.onload = function () {
+            var arrayBuffer = reader.result;
+            if (e.target.id.indexOf("CreoViewWebGLDiv") == 0) {
+                session.RemoveAllLoadSources();
+                structure1 = session.LoadStructureWithDataSource(reader.filename, arrayBuffer, true, function (success, errors) {
+                    if (success === true) {
+                        model1 = shapeScene.MakeModel();
+                        model1.LoadStructure(structure1, true, true, function (success, isStructure, errorStack) {
+                            console.log("Model LoadStructure - success: " + success + ", isStructure: " + isStructure);
+                        });
+                    }
+                })
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+</script>
+
+<body style="height: 100%; margin: 0px">
+    <div style="width: 100%; height: 100%; overflow: hidden;">
+        <div id="CreoViewWebGLDiv" style="width: 45%;height: 80%;border:0; float: left"></div>
+    </div>
+</body>
+
+</html>

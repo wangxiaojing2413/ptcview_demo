@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pva xmlns:mes="http://www.ptc.com/productview/namespace/mes" version="2.0">
+  <set name="EXP0001">
+    <component>
+      <component id="39">
+        <position x="-0.316852" y="1.072649" z="-0.126595"/>
+        <orientation x="1.000000" y="0.000000" z="0.000000" a="0.000000"/>
+      </component>
+      <component id="40">
+        <position x="0.053354" y="2.301630" z="-0.139700"/>
+        <orientation x="1.000000" y="0.000000" z="0.000000" a="90.000000"/>
+      </component>
+      <component id="41">
+        <position x="0.097789" y="0.411224" z="-0.139700"/>
+        <orientation x="1.000000" y="0.000000" z="0.000000" a="90.000000"/>
+      </component>
+    </component>
+  </set>
+</pva>

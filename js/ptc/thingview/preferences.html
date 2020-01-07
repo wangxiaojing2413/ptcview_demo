@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+    body{
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .Table
+    {
+        display: table;
+        width: 100%;
+        padding-left: 0px;
+        border-left: 0px;
+    }
+    .Row
+    {
+        display: table-row;
+        padding-top: 5px;
+        padding-left: 5px;
+    }
+    .Cell
+    {
+        display: table-cell;
+        border: solid;
+        border-width: thin;
+        padding-left: 5px;
+        padding-right: 2px;
+    }
+    .btn
+    {
+        width:120px;
+    }
+    .btns
+    {
+        margin: 5px;
+    }
+    .resetdefault
+    {
+    margin: 5px;
+    }
+</style>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>Creo View WebGL Preferences</title>
+</head>
+<body>
+<div class="Table">
+    <div class="Row">
+        <div class="Cell">
+            <p>Navigation</p>
+        </div>
+        <div class="Cell">
+            <select id="navSelect" onchange="_onNavSelect()">
+                <option value="--"></option>
+                <option value="CREO_VIEW" selected="selected">Creo View</option>
+                <option value="CREO">Creo</option>
+                <option value="CATIA">CATIA V5 Compatible</option>
+                <option value="EXPLORE">Explore</option>
+            </select>
+        </div>
+    </div>
+    <div class="Row">
+        <div class="Cell">
+            <p>File Cache Enabled</p>
+
+        </div>
+        <div class="Cell">
+            <input type="checkbox" id="filecache" onclick="_fileCache()" checked>
+            (This will be applied after reloading the page)
+        </div>
+    </div>
+    <div class="Row">
+        <div class="Cell">
+            <p>File Cache Size</p>
+        </div>
+        <div class="Cell">
+            Size(MB): <input type="number" id="filecachesize" min="0" max="1000000" step="1" oninput="_fileCacheSize()" />
+        </div>
+    </div>
+</div>
+
+<div class="resetdefault">
+    <input class="btn" type="button" size="25" name="reset" value="Reset to Default" onclick="_reset()" />
+</div>
+<hr>
+<div class="btns" style="text-align: center;">
+        <input class="btn" id="okbtn" type="button" size="25" name="ok" value="Ok" onclick="_ok()" disabled>
+        <input class="btn" id="cancelbtn" type="button" size="25" name="cancel" value="Cancel" onclick="_cancel()" >
+</div>
+
+<script type="text/javascript">
+
+var navSelected = false;
+var cacheSelected = false;
+var cacheSizeSelected = false;
+
+function _setBtnStatus(ok, cancel) {
+    document.getElementById("okbtn").disabled = !ok;
+    document.getElementById("cancelbtn").disabled = !cancel;
+}
+
+function _onNavSelect() {
+    navSelected = true;
+    _setBtnStatus(true, true);
+}
+
+function _fileCache() {
+    cacheSelected = true;
+    if (document.getElementById("filecache").checked) {
+        document.getElementById("filecachesize").disabled = false;
+    } else {
+        document.getElementById("filecachesize").disabled = true;
+    }
+    _fileCacheSize();
+}
+
+function _fileCacheSize() {
+    var fcSize = document.getElementById("filecachesize").value;
+    if (fcSize == "" || isNaN(fcSize)) {
+        cacheSizeSelected = false;
+        _setBtnStatus(false, true);
+    } else {
+        if (fcSize >= 1 && fcSize <= 1000000) {
+            cacheSizeSelected = true;
+            _setBtnStatus(true, true);
+        } else {
+            cacheSizeSelected = false;
+            _setBtnStatus(false, true);
+        }
+    }
+}
+
+function _ok() {
+    _sendPrefs();
+    window.close();
+}
+
+function _reset() {
+    navSelected = false;
+    cacheSelected = false;
+    cacheSizeSelected = false;
+    _setBtnStatus(true, false);
+    loadedPrefs = {};
+    _applyPrefs();
+    message_broadcast('resetPref', 'true');
+}
+
+function _applyPrefs() {
+    try {
+        if (loadedPrefs) {
+            var navEl = document.getElementById("navSelect");
+            var fc = document.getElementById("filecache");
+            var fcSize = document.getElementById("filecachesize");
+
+            if (loadedPrefs[s_pref_nav_navmode] !== undefined)
+                navEl.value = loadedPrefs[s_pref_nav_navmode];
+            else 
+                if (defaultPrefs[s_pref_nav_navmode] !== undefined)
+                    navEl.value = defaultPrefs[s_pref_nav_navmode];
+                    
+            if (loadedPrefs[s_pref_gen_filecache] !== undefined) {
+                if (loadedPrefs[s_pref_gen_filecache] === true) {
+                    fc.checked = true;
+                    fcSize.disabled = false;
+                } else {
+                    fc.checked = false;
+                    fcSize.disabled = true;
+                }
+            } else {
+                if (defaultPrefs[s_pref_gen_filecache] !== undefined) {
+                    if (defaultPrefs[s_pref_gen_filecache] === true) {
+                        fc.checked = true;
+                        fcSize.disabled = false;
+                    } else {
+                        fc.checked = false;
+                        fcSize.disabled = true;
+                    }
+                }
+            }
+
+            if (loadedPrefs[s_pref_gen_filecachesize] !== undefined)
+                fcSize.value = Number(loadedPrefs[s_pref_gen_filecachesize]);
+            else 
+                if (defaultPrefs[s_pref_gen_filecachesize] !== undefined)
+                fcSize.value = Number(defaultPrefs[s_pref_gen_filecachesize]);
+        }
+    } catch (e) {
+    }
+}
+
+var s_pref_nav_navmode = "Nav.NavMode";
+var s_pref_gen_filecache = "Gen.FileCache";
+var s_pref_gen_filecachesize = "Gen.FileCacheSize";
+var loadedPrefs = {};
+var defaultPrefs = {};
+
+function _sendPrefs() {
+    var navEl = document.getElementById("navSelect");
+    var fc = document.getElementById("filecache");
+    var fcSize = document.getElementById("filecachesize");
+    var objList = new Object();
+    if (navSelected) {
+        if (navEl.value !== "--") {
+            objList[s_pref_nav_navmode] = navEl.value;
+        }
+    }
+    if (cacheSelected)
+        objList[s_pref_gen_filecache] = fc.checked;
+    if (cacheSizeSelected)
+        objList[s_pref_gen_filecachesize] = fcSize.value.toString();
+
+    var myJSON = JSON.stringify(objList);
+    message_broadcast('msgPref', myJSON);
+}
+
+function _cancel() {
+    window.close();
+}
+
+window.onload = function() {
+    message_broadcast('msgReady', 'true');
+}
+
+window.onunload = function() {
+    message_broadcast('msgClose', 'true');
+}
+
+window.addEventListener("storage", message_receive);
+
+function message_broadcast(name, value) {
+    localStorage.setItem(name, value);
+    localStorage.removeItem(name);
+}
+
+function message_receive(ev) {
+    if (ev.key == 'msgCurPref') {
+        if ( (ev.newValue !== undefined) && (ev.newValue !== "undefined")  && (ev.newValue !== null) && (ev.newValue !== "") ) {
+            try {
+                var message = JSON.parse(ev.newValue);
+                loadedPrefs = message;
+                _applyPrefs();
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    } else if (ev.key == 'msgDefPref') {
+        if ( (ev.newValue !== undefined) && (ev.newValue !== "undefined")  && (ev.newValue !== null) && (ev.newValue !== "") ) {
+            try {
+                var message = JSON.parse(ev.newValue);
+                defaultPrefs = message;
+                _applyPrefs();
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    }
+}
+</script>
+</body>
+</html>

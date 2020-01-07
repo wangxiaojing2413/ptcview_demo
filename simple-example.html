@@ -1,0 +1,2421 @@
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="./creoview-webgl-example.css" />
+    <title>Creo View WebGL Example</title>
+    <style>
+    </style>
+</head>
+<body class=ng-cloak ng-app="ThingView" resize>
+<!--<script src="https://cdn.staticfile.org/angular.js/1.4.6/angular.min.js"></script>-->
+<script src="js/angular.min.js"></script>
+<script src="js/ptc/thingview/thingview.js"></script>
+<script src="tree/tvTree.module.js"></script>
+<script src="app.js"></script>
+
+<div id="app" ng-controller="ThingViewController" ng-init="sessionId='view1'" ng-click="HideAllMenu()">
+    <!--<div id="headMenu" class="table widthLayout" ng-show="showOnlyGraphics === 'NO'">
+        <nav id="primary_nav_wrap" style="z-index: 2;">
+            <ul class="noselect">
+                <li id="modelsMenuParent" ng-mouseenter="ShowModelsMenu($event)" ng-mouseleave="HideModelsMenu($event, true)">
+                    <a href="#" ng-click="ShowModelsMenu($event, true)">Models ({{availableModels.length}})</a>
+                    <div id="modelsMenuChildren" ng-mouseleave="HideModelsMenu($event, false)">
+                        <div>
+                            <ul id="modelsMenuChildrenTop" ng-style="ModelsMenuVisible === true ? {'display':'block'} : {'display':'none'}">
+                                <li>
+                                    <label for="creoviewfile">Choose PVZ file to open</label>
+                                    <input type="file" id="creoviewfile" accept=".pvz" onchange="angular.element(this).scope().OpenModel(this)">
+                                </li>
+                                <li>
+                                    <label>Open from URL</label><br/>
+                                    <input id="pvsUrlInput" type="text" size="60" ng-model="pvsUrl" placeholder="Put PVS URL..."
+                                           ng-focus="StopPropagation($event);" ng-click="StopPropagation($event);"
+                                           ng-keyup="LoadPVSKeyPressed($event)" required url-checker/>
+                                    <input id="loadbtn" type="button" value="Load" ng-click="LoadPVS()"/>
+                                </li>
+                                <li>
+                                    <a href="#" ng-click="RemoveAllModels()" >Remove All Models</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <ul id="modelsMenuChildrenBottom" ng-style="ModelsMenuVisible === true ? {'display':'block'} : {'display':'none'}">
+                            <li ng-repeat="model in availableModels | orderBy: '-timestamp' track by $index">
+                                <a href="#" ng-click="LoadAvailableModel(model)" >
+                                    <span id="{{'models'+$index}}">{{$index+1}}: {{model.id ? model.id : model.name}}</span>
+                                    <input id="closebtn" type="button" value="X" ng-click="DeleteAvailableModel($event, model)"/>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a href="#" ng-click="activeMenu = 'home'" ng-style="activeMenu === 'home' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Home</a>
+                </li>
+                <li ng-show="view3D && loadState == 'Loaded'">
+                    <a href="#" ng-click="activeMenu = 'markup'" ng-style="activeMenu === 'markup' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Markup</a>
+                </li>
+                <li ng-show="view3D && loadState == 'Loaded'">
+                    <a href="#" ng-click="activeMenu = 'viewlocation'" ng-style="activeMenu === 'viewlocation' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">View Location</a>
+                </li>
+                <li ng-show="selection.length == 1">
+                    <a href="#" id="partLocationMenu" ng-click="activeMenu = 'partlocation'" ng-style="activeMenu === 'partlocation' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Part Location</a>
+                </li>
+                <li ng-show="view3D && loadState == 'Loaded'">
+                    <a href="#" id="sectioningMenu" ng-click="activeMenu = 'sectioning'" ng-style="activeMenu === 'sectioning' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Sectioning</a>
+                </li>
+                <li ng-show="webglSettings.selectionFilter == 'MODEL'">
+                    <a href="#" id="modelLocationMenu" ng-click="activeMenu = 'modellocation'" ng-style="activeMenu === 'modellocation' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Model Location</a>
+                </li>
+                <li id="settingsMenuParent" ng-mouseenter="ShowSettingsMenu($event)" ng-mouseleave="HideSettingsMenu($event, true)">
+                    <a href="#" ng-click="ShowSettingsMenu($event, true)">Settings</a>
+                    <div>
+                        <ul id="settingsMenuChildren" ng-style="SettingsMenuVisible === true ? {'display':'block'} : {'display':'none'}" ng-mouseleave="HideSettingsMenu($event, false)">
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.showGnomon" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Gnomon</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.showSpinCenter" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Show Spin Center</span>
+                                </label>
+                            </li>
+                            <li id="subMenuSelection" ng-click="ShowSubSettingsMenu($event, true)" ng-mouseenter="ShowSubSettingsMenu($event)" ng-mouseleave="HideSubSettingsMenu($event)">
+                                <label class="tasks-list-item">
+                                    <span class="tasks-list-desc">Selection</span>
+                                    <span style="float: right;">&#9658;</span>
+                                </label>
+                            </li>
+                            <li id="subMenuPreselection" ng-click="ShowSubSettingsMenu($event, true)" ng-mouseenter="ShowSubSettingsMenu($event)" ng-mouseleave="HideSubSettingsMenu($event)">
+                                <label class="tasks-list-item">
+                                    <span class="tasks-list-desc">Preselection</span>
+                                    <span style="float: right;">&#9658;</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.structureEdit" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Structure Edit</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.dragSnap" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Drag Snap</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.showFloor" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Floor</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.transparentFloor" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Transparent Floor</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.showDropShadow" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Drop Shadow</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.doNotRoll" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Do Not Roll</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.antiAliasing" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Anti-Aliasing</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.showProgress" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Show Progress</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.enableCrossSiteAccess" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Cross Site Access</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.removeModelsOnLoad" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Remove existing on load</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.autoload" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Autoload</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.expandAncestors" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Expand tree ancestors</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.showStatistics" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Render Statistics | Update rate (ms): </span>
+                                    <input type="number" ng-model="webglSettings.statsPollingRate" min="0" max="10000" step="100" ng-change="stats.ResetTimer()"
+                                           ng-focus="StopPropagation($event);" ng-click="StopPropagation($event);"/>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <span class="tasks-list-desc">Inertial spin</span>
+                                    <input type="number" ng-model="webglSettings.decayrate" min="0" max="1" step="0.1" ng-change="SetInertialSpinDecayRate()"
+                                           ng-focus="StopPropagation($event);" ng-click="StopPropagation($event);"/>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <span class="tasks-list-desc">Part Selection Color | Fill:</span>
+                                    <div class="color-display-background"></div>
+                                    <div class="color-display" ng-style="GetColorDisplayStyle(partSelectionFillColor, 1)"
+                                         ng-click="ShowPartSelectionColorDialog(1)"></div>
+                                    <span class="tasks-list-desc" style="margin: 0px 3px 3px 3em">Outline:</span>
+                                    <div class="color-display-background"></div>
+                                    <div class="color-display" ng-style="GetColorDisplayStyle(partSelectionOutlineColor, 2)"
+                                         ng-click="ShowPartSelectionColorDialog(2)"></div>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <span id="longestSettingsSpanOne" class="tasks-list-desc">Part Preselection Color | Fill:</span>
+                                    <div id="longestSettingsDivOne" class="color-display-background"></div>
+                                    <div class="color-display" ng-style="GetColorDisplayStyle(partPreselectionFillColor, 3)"
+                                         ng-click="ShowPartPreselectionColorDialog(3)"></div>
+                                    <span id="longestSettingsSpanTwo" class="tasks-list-desc" style="margin: 0px 3px 3px 3em">Outline:</span>
+                                    <div class="color-display-background"></div>
+                                    <div id="longestSettingsDivTwo" class="color-display" ng-style="GetColorDisplayStyle(partPreselectionOutlineColor, 4)"
+                                         ng-click="ShowPartPreselectionColorDialog(4)"></div>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <span class="tasks-list-desc">Custom Selection Color | Fill:</span>
+                                    <div class="color-display-background"></div>
+                                    <div class="color-display" ng-style="GetColorDisplayStyle(customSelectColor[0].fill, 8)"
+                                         ng-click="ShowCustomSelectionColorDialog(8)"></div>
+                                    <span class="tasks-list-desc" style="margin: 0px 3px 3px 3em">Outline:</span>
+                                    <div class="color-display-background"></div>
+                                    <div class="color-display" ng-style="GetColorDisplayStyle(customSelectColor[0].outline, 9)"
+                                         ng-click="ShowCustomSelectionColorDialog(9)"></div>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <span class="tasks-list-desc">{{backgroundColorNum == 'ONE' ? 'Background Color:' : 'Background Color | Top:'}}</span>
+                                    <div ng-show="backgroundColorNum == 'ONE'" style="display: inline; margin-left: 3px;">
+                                        <div class="color-display-background"></div>
+                                        <div class="color-display" ng-style="GetColorDisplayStyle(backgroundColor, 7)"
+                                             ng-click="ShowBackgroundColorDialog(7)"></div>
+                                    </div>
+                                    <div ng-show="backgroundColorNum == 'TWO'" style="display: inline-block; margin-bottom: 3px;">
+                                        <div class="color-display-background"></div>
+                                        <div class="color-display" ng-style="GetColorDisplayStyle(backgroundTopColor, 5)"
+                                             ng-click="ShowBackgroundColorDialog(5)"></div>
+                                        <span class="tasks-list-desc" style="margin: 0px 3px 3px 3em">Bottom:</span>
+                                        <div class="color-display-background"></div>
+                                        <div class="color-display" ng-style="GetColorDisplayStyle(backgroundBottomColor, 6)"
+                                             ng-click="ShowBackgroundColorDialog(6)"></div>
+                                    </div>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="pdfSettings.toolbarEnabled" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">PDF Toolbar Enabled</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="checkbox" class="tasks-list-cb" ng-model="webglSettings.selectionLogging" ng-true-value="'YES'" ng-false-value="'NO'">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Selection Logging to console</span>
+                                </label>
+                            </li>
+                            <li ng-if="webglSettingsLoaded">
+                                <label class="tasks-list-item" ng-click="ResetIndexedDBSettings()">
+                                    <span class="tasks-list-desc">Reset settings in indexedDB</span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <ul class="sub-menu-content" id="subMenuSelection-Content" ng-mouseleave="HideSubSettingsChildrenMenu($event)">
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="radio" class="tasks-list-cb" ng-model="webglSettings.selectionFilter" value="PART">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Part</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="radio" class="tasks-list-cb" ng-model="webglSettings.selectionFilter" value="MODEL">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Model</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="radio" class="tasks-list-cb" ng-model="webglSettings.selectionFilter" value="DISABLED">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Disable</span>
+                                </label>
+                            </li>
+                        </ul>
+                        <ul class="sub-menu-content" id="subMenuPreselection-Content" ng-mouseleave="HideSubSettingsChildrenMenu($event)">
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="radio" class="tasks-list-cb" ng-model="webglSettings.preselectionFilter" value="PART">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Part</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="radio" class="tasks-list-cb" ng-model="webglSettings.preselectionFilter" value="MODEL">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Model</span>
+                                </label>
+                            </li>
+                            <li>
+                                <label class="tasks-list-item">
+                                    <input type="radio" class="tasks-list-cb" ng-model="webglSettings.preselectionFilter" value="DISABLED">
+                                    <span class="tasks-list-mark"></span>
+                                    <span class="tasks-list-desc">Disable</span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </div>-->
+
+    <!--<div id="ribbonMenu" class="table widthLayout noselect" ng-show="showOnlyGraphics === 'NO'">
+        <div id="ribbon">
+            <div ng-show="activeMenu == 'home'">
+                <div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="zoomall" type="button" ng-click="ZoomView()" />
+                                <p id="ribbonlabel">Zoom All</p>
+                            </div>
+                            <div id="ribbonitem" ng-show="view3D">
+                                <input class="zoomselected" ng-disabled="instanceSelector == ''" type="button" ng-click="ZoomSelected()" />
+                                <p id="ribbonlabel">Zoom Selected</p>
+                            </div>
+                            <div id="ribbonitem" ng-show="viewExtension != 'pdf'">
+                                <input id="zoomwindow" type="button" ng-click="ZoomWindow()" />
+                                <p id="ribbonlabel">Zoom Window</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="zoomin" type="button" ng-click="ZoomIn()" />
+                                <p id="ribbonlabel">Zoom In</p>
+                            </div>
+                            <div id="ribbonitem" ng-show="viewExtension != 'pdf'">
+                                <input type="text" style="text-align: center;" ng-model="zoomScale" size="4" />
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="zoomout" type="button" ng-click="ZoomOut()" />
+                                <p id="ribbonlabel">Zoom Out</p>
+                            </div>
+                            <div id="ribbonitem" ng-show="view3D">
+                                <input id="setspincenter" type="button" ng-click="SetSpinCenter()" />
+                                <p id="ribbonlabel">Set Spin Center</p>
+                            </div>
+                            <div id="ribbonitem" ng-show="view3D">
+                                <input id="autospincenter" type="button" ng-style="GetAutoSpinCenterButtonStyle()" ng-click="SetAutomaticSpinCenter()" />
+                                <p id="ribbonlabel">Automatic Spin Center</p>
+                            </div>
+                            <label ng-show="view3D"> Nav: </label>
+                            <select ng-show="view3D"
+                                    ng-model="webglSettings.navMode"
+                                    ng-options="nav for nav in navigation">
+                            </select>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Navigation
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div id="ribbongroup" ng-show="view3D">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="transform" type="button" ng-style="GetTransformButtonStyle()" ng-click="ToggleTransformMode()" />
+                                <p id="ribbonlabel">Transform</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="restoreall" type="button" ng-click="UnsetLocation(true)" />
+                                <p id="ribbonlabel">Unset Location</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input class="restoreselected" ng-disabled="instanceSelector == ''" type="button" ng-click="UnsetSelectedLocation()" />
+                                <p id="ribbonlabel">Unset Sel Location</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Location
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div id="ribbongroup" ng-show="view3D">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="orthoView" type="button" ng-click="SetOrthographicView()" ng-disabled="orthoProjection"/>
+                                <p id="ribbonlabel">Ortho</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="perspView" type="button" ng-click="SetPerspectiveView()" ng-disabled="!orthoProjection"/>
+                                <p id="ribbonlabel">Perspect</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="showfilters" type="button" ng-click="ShowShapeFiltersDialog()" />
+                                <p id="ribbonlabel">Filters</p>
+                            </div>
+                            <label> Orient: </label>
+                            <select
+                                    ng-model="orientPreset"
+                                    ng-options="orient.name disable when orient.name == 'CAD Model' for orient in orientations">
+                            </select>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Display
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="viewExtension == 'pdf'">
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="docFirst" type="button" ng-click="LoadPage(1)" ng-disabled="currentPageNo == 1"/>
+                                <p id="ribbonlabel">First</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docPrevious" type="button" ng-click="LoadPrevPage()" ng-disabled="currentPageNo == 1"/>
+                                <p id="ribbonlabel">Previous</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align: center;" ng-model="currentPageNo" size="2" ng-init="currentPageNo" ng-keypress="($event.keyCode==13)? LoadPage(currentPageNo) : return" /> / {{totalPageNo}}
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docNext" type="button" ng-click="LoadNextPage()" ng-disabled="currentPageNo == totalPageNo"/>
+                                <p id="ribbonlabel">Next</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docLast" type="button" ng-click="LoadPage(totalPageNo)" ng-disabled="currentPageNo == totalPageNo"/>
+                                <p id="ribbonlabel">Last</p>
+                            </div>
+                            <div id ="ribbonitem">
+                                <label> Page Mode: </label>
+                                <select
+                                        ng-model="pageModesPreset"
+                                        ng-options="mode for mode in pageModes"
+                                        ng-change="setPageModePDF(pageModesPreset)">
+                                </select>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docPanSelect" type="button" ng-click="SetPanModePDF()"/>
+                                <p id="ribbonlabel">Pan Mode</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docTextSelect" type="button" ng-click="SetTextModePDF()"/>
+                                <p id="ribbonlabel">Text Mode</p>
+                            </div>
+                            <div id = "ribbonitem">
+                                <label> Search: </label>
+                                <input type="text" id="docSearchTextField" ng-keydown="SubmitPdfSearchKey($event)">
+                                <input id="docSearchSubmitButton" type="button" ng-click="SubmitPdfSearch()">
+                                <input id="docSearchPrevButton" type="button" ng-click="PrevPdfSearch()">
+                                <input id="docSearchNextButton" type="button" ng-click="NextPdfSearch()">
+                                <input id="docSearchClearButton" type="button" ng-click="ClearPdfSearch()">
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docSidePaneToggle" type="button" ng-click="TogglePdfSidePane()"/>
+                                <p id="ribbonlabel">Show Navigation Pane</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docRotateClockwise" type="button" ng-click="RotateDocumentPages(true)"/>
+                                <p id="ribbonlabel">Rotate Clockwise</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docRotateAntiClockwise" type="button" ng-click="RotateDocumentPages(false)"/>
+                                <p id="ribbonlabel">Rotate Anti-Clockwise</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docPrint" type="button" ng-click="PrintPdf()"/>
+                                <p id="ribbonlabel">Print PDF</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="docMarkupFilter" type="button" ng-click="TogglePdfMarkups()"/>
+                                <p id="ribbonlabel">Toggle Markup Filter</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Document
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="hasAnimation">
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="aniStop" type="button" ng-click="SetAnimationCmd('StopAnimation')" ng-disabled="!hasAnimation" />
+                                <p id="ribbonlabel">Rewind</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="aniPlay" type="button" ng-click="SetAnimationCmd('PlayAnimation')" ng-disabled="!hasAnimation"/>
+                                <p id="ribbonlabel">Play</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="aniPause" type="button" ng-click="SetAnimationCmd('PauseAnimation')" ng-disabled="!hasAnimation"/>
+                                <p id="ribbonlabel">Pause</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="animationSpeed" size="3" ng-disabled="!hasAnimation" ng-change="SetAnimationSpeed()"/>
+                                <p id="ribbonlabel">Speed</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Animation
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="hasSequence">
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="seqRewind" type="button" ng-click="SetSequenceCmd('Rewind')" ng-disabled="GetSequenceRewindButtonStatus()"/>
+                                <p id="ribbonlabel">Rewind</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="seqPrev" type="button" ng-click="SetSequenceCmd('Previous Step')" ng-disabled="GetSequenceRewindButtonStatus()"/>
+                                <p id="ribbonlabel">Prev</p>
+                            </div>
+                            <div id="ribbonitem" ng-show="ShowSequencePlayButton()">
+                                <input id="aniPlay" type="button" ng-click="SetSequenceCmd('Play')" ng-disabled="GetSequencePlayButtonStatus()"/>
+                                <p id="ribbonlabel">Play</p>
+                            </div>
+                            <div id="ribbonitem" ng-show="ShowSequencePauseButton()">
+                                <input id="aniPause" type="button" ng-click="SetSequenceCmd('Pause')" ng-disabled="GetSequencePauseButtonStatus()"/>
+                                <p id="ribbonlabel">Pause</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="seqPlayAll" type="button" ng-click="SetSequenceCmd('Play All')" ng-disabled="GetSequencePlayAllButtonStatus()"/>
+                                <p id="ribbonlabel">Play All</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="seqNext" type="button" ng-click="SetSequenceCmd('Next Step')" ng-disabled="GetSequenceNextButtonStatus()"/>
+                                <p id="ribbonlabel">Next</p>
+                            </div>
+                            <div id="ribbonitem">
+                                {{GetCurrentSequenceStepStatus()}}
+                                <p id="ribbonlabel">Steps</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="sequenceStep" size="3" ng-disabled=""/>
+                                <p id="ribbonlabel">Current Step</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="ribbonbutton" type="button" ng-click="SetSequenceCmd('GoTo')" ng-disabled=""/>
+                                <p id="ribbonlabel">Go</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Sequence
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="activeMenu == 'markup' && view3D && loadState == 'Loaded'">
+                <div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="leaderline" type="button" ng-style="GetLeaderLineButtonStyle()" ng-click="CreateLeaderLine()" />
+                                <p id="ribbonlabel">Leader Line</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Markups
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="bbox" type="button" ng-click="AddBoundingBox()"/>
+                                <p id="ribbonlabel">Add Box</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="bsphere" type="button" ng-click="AddBoundingSphere()"/>
+                                <p id="ribbonlabel">Add Sphere</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Bounding Box/Sphere
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="spatialFilter" type="button" ng-click="ShowSpatialFilterDialog()"/>
+                                <p id="ribbonlabel">Spatial Filter</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Spatial Filter
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="activeMenu == 'modellocation' && view3D && loadState == 'Loaded'">
+                <div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="modelLocation.position.x" size="6"/>
+                                <p id="ribbonlabel">X</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="modelLocation.position.y" size="6"/>
+                                <p id="ribbonlabel">Y</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="modelLocation.position.z" size="6"/>
+                                <p id="ribbonlabel">Z</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Position
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="modelLocation.orientation.x" size="4"/>
+                                <p id="ribbonlabel">X</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="modelLocation.orientation.y" size="4"/>
+                                <p id="ribbonlabel">Y</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="modelLocation.orientation.z" size="4"/>
+                                <p id="ribbonlabel">Z</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Orientation
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="activeMenu == 'partlocation'">
+                <div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="ribbonbutton" type="button" ng-click="GetPartLocation()"/>
+                                <p id="ribbonlabel">Get Part Location</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="ribbonbutton" type="checkbox" ng-model="locationOverride" ng-true-value="'YES'" ng-false-value="'NO'"/>
+                                <p id="ribbonlabel">Remove Descendant Override</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="ribbonbutton" type="button" ng-click="SetPartLocation()"/>
+                                <p id="ribbonlabel">Set Part Location</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="ribbonbutton" type="button" ng-click="UnsetPartLocation()"/>
+                                <p id="ribbonlabel">Unset Part Location</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Part
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="partLocation.position.x" size="6"/>
+                                <p id="ribbonlabel">X</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="partLocation.position.y" size="6"/>
+                                <p id="ribbonlabel">Y</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="partLocation.position.z" size="6"/>
+                                <p id="ribbonlabel">Z</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Position
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="partLocation.orientation.x" size="4"/>
+                                <p id="ribbonlabel">X</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="partLocation.orientation.y" size="4"/>
+                                <p id="ribbonlabel">Y</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="partLocation.orientation.z" size="4"/>
+                                <p id="ribbonlabel">Z</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Orientation
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="activeMenu == 'sectioning'">
+                <div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="sectioningView" type="button" ng-click="ViewSectionCut()" ng-disabled="sectioning"/>
+                                <p id="ribbonlabel">View Section</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="sectioningDelete" type="button" ng-click="DeleteSectionCut()" ng-disabled="!sectioning"/>
+                                <p id="ribbonlabel">Delete Section</p>
+                            </div>
+                            <label> Preset Section: </label>
+                            <select
+                                    ng-model="sectioningPreset"
+                                    ng-options="preset for preset in sectioningPresets"
+                                    ng-change="SetSectionCutPreset()"
+                                    ng-disabled="!sectioning">
+                            </select>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Appearance
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="sectioningPlanar" type="button" ng-click="SetPlanarSectionCut()" ng-disabled="GetSectioningPlanarDisabled()"/>
+                                <p id="ribbonlabel">Planar</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="sectioningQuarter" type="button" ng-click="SetQuarterCutSectionCut()" ng-disabled="GetSectioningQuarterDisabled()"/>
+                                <p id="ribbonlabel">Quarter Cut</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Type
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="activeMenu == 'viewlocation'">
+                <div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input id="ribbonbutton" type="button" ng-click="GetViewLocation()"/>
+                                <p id="ribbonlabel">Get View Location</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input id="ribbonbutton" type="button" ng-click="SetViewLocation()"/>
+                                <p id="ribbonlabel">Set View Location</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            View
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="viewLocation.position.x" size="6"/>
+                                <p id="ribbonlabel">X</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="viewLocation.position.y" size="6"/>
+                                <p id="ribbonlabel">Y</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="viewLocation.position.z" size="6"/>
+                                <p id="ribbonlabel">Z</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Position
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="viewLocation.orientation.x" size="4" ng-keyup="ViewLocationKeyPressed($event)"/>
+                                <p id="ribbonlabel">X</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="viewLocation.orientation.y" size="4" ng-keyup="ViewLocationKeyPressed($event)"/>
+                                <p id="ribbonlabel">Y</p>
+                            </div>
+                            <div id="ribbonitem">
+                                <input type="text" style="text-align:center;" ng-model="viewLocation.orientation.z" size="4" ng-keyup="ViewLocationKeyPressed($event)"/>
+                                <p id="ribbonlabel">Z</p>
+                            </div>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Orientation
+                        </div>
+                    </div>
+                    <div id="ribbongroup">
+                        <div id="ribbonoptionsgroup">
+                            <label> Orient: </label>
+                            <select
+                                    ng-model="modelOrientPreset"
+                                    ng-options="orient for orient in modelOrientations"
+                                    ng-change="SetModelUpDirection()">
+                            </select>
+                        </div>
+                        <div id="ribbongrouplabel">
+                            Model Orientation
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+
+    <div id="middleArea" class="table widthLayout" style="border: 1px solid grey;">
+        <div class="row">
+            <div id="context-available" class="table widthFull">
+                <div class="cell noselect" ng-show="showPrimaryPane == 'YES' && showOnlyGraphics =='NO'" style="vertical-align: top;">
+                    <div class="table widthFull">
+                        <nav id="tab_nav_wrap">
+                            <ul id="primaryPaneTitle">
+                                <li>
+                                    <a href="#" ng-click="activePrimaryPane = 'structure'" ng-style="activePrimaryPane === 'structure' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Structure</a>
+                                </li>
+                                <li>
+                                    <a href="#" ng-click="activePrimaryPane = 'viewables'" ng-style="activePrimaryPane === 'viewables' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Viewables</a>
+                                </li>
+                                <li>
+                                    <a href="#" ng-click="activePrimaryPane = 'annotations'" ng-style="activePrimaryPane === 'annotations' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Annotation Sets</a>
+                                </li>
+                            </ul>
+                        </nav>
+
+                        <div class="row" ng-show="activePrimaryPane == 'viewables'">
+                            <div>
+                                <div name="primaryPanes" class="cellTree" viewables></div>
+                            </div>
+                        </div>
+
+                        <div class="row" ng-show="activePrimaryPane == 'annotations'">
+                            <div id="annotationsDiv">
+                                <div name="primaryPanes" class="cellTree" annotations></div>
+                            </div>
+                        </div>
+
+                        <div class="row" ng-show="activePrimaryPane == 'structure'">
+                            <div ng-click="ClearNodeSelection()" id="treeDiv">
+                                <div class="structureTree" tv-Tree></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell noselect" style="height: 100%; vertical-align: top;" ng-show="showSecondaryPane == 'YES' && showOnlyGraphics =='NO'">
+                    <div class="table widthFull">
+                        <div class="row">
+                            <nav id="tab_nav_wrap">
+                                <ul id="secondaryPaneTitle">
+                                    <li>
+                                        <a href="#" ng-click="activeSecondaryPane = 'modelAnnotations'" ng-show="view3D" ng-style="activeSecondaryPane === 'modelAnnotations' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Model Annotations</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" ng-click="activeSecondaryPane = 'markups'" ng-show="view3D" ng-style="activeSecondaryPane === 'markups' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Markups</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" ng-click="activeSecondaryPane = 'selinstances'" ng-show="view3D" ng-style="activeSecondaryPane === 'selinstances' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Sel Instances</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" ng-click="activeSecondaryPane = 'layers'" ng-show="view3D" ng-style="activeSecondaryPane === 'layers' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Layers</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" ng-click="activeSecondaryPane = 'spatialfilter'" ng-show="view3D" ng-style="activeSecondaryPane === 'spatialfilter' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Filter Results</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" ng-click="activeSecondaryPane = 'bookmarks'" ng-show="viewExtension == 'pdf'" ng-style="activeSecondaryPane === 'bookmarks' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Document Bookmarks</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="row" ng-show="activeSecondaryPane == 'modelAnnotations'">
+                            <div ng-click="ClearFeatureSelection()" id="modelAnnotationsDiv">
+                                <div class="modelannotationsTree" tv-Tree></div>
+                            </div>
+                        </div>
+                        <div class="row" ng-show="activeSecondaryPane == 'markups'">
+                            <div id="markupsDiv">
+                                <div name="secondaryPanes" class="cellTree" markups></div>
+                            </div>
+                        </div>
+                        <div class="row" ng-show="activeSecondaryPane == 'selinstances'">
+                            <div id="selinstancesDiv">
+                                <div name="secondaryPanes" class="cellTree" selinstances></div>
+                            </div>
+                        </div>
+                        <div class="row" ng-show="activeSecondaryPane == 'layers'">
+                            <div ng-click="ClearLayerSelection()" id="layersDiv">
+                                <div name="secondaryPanes" class="cellTree" layers></div>
+                            </div>
+                        </div>
+                        <div class="row" ng-show="activeSecondaryPane == 'spatialfilter'">
+                            <div id="spatialfilterDiv">
+                                <div name="secondaryPanes" class="cellTree" spatialfilter></div>
+                            </div>
+                        </div>
+                        <div class="row" ng-show="activeSecondaryPane == 'bookmarks' && viewExtension == 'pdf'">
+                            <div id="bookmarksDiv">
+                                <div name="secondaryPanes" class="cellTree" bookmarks></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="viz" style="width: 100%; height: 600px; position: relative;" id="parentVizDiv">
+                    <div id="progressDiv" class="table widthLayout noselect" style="border: 1px solid grey">
+                        <div id="progressParent">
+                            <div id="progress">
+                                <div id="progressBarTitle" class="noselect" ng-show="currentDocument == null"> {{modelParams.url}} - {{loadState}} - {{loadTime}}s </div>
+                                <div id="progressBarTitle" class="noselect" ng-show="currentDocument != null"> {{currentDocument}} </div>
+                                <div id="progressBar"></div>
+                            </div>
+                            <div id="version" ng-style="showOnlyGraphics === 'YES' ? {'right':'135px'} : {'right':'2px'}">{{webglVersion}}</div>
+                        </div>
+                    </div>
+                    <div id="spinnerDiv" class="spinnerDiv" ng-show="showSpinner == true">
+                        <div class="spinner"></div>
+                        <div class="spinnerText">Initializing...</div>
+                    </div>
+                    <div tview style="height: 100%;" ng-show="showSpinner == false"></div>
+                    <div class="sequenceStepName noselect" ng-show="false">
+                        <div>{{curSequenceStep.humanReadableName}}</div>
+                        <div style="white-space: pre-line; text-align: left;">{{curSequenceStep.humanReadableDesc}}</div>
+                    </div>
+                    <div class= "renderStatistics" id ="renderStatistics" ng-show="webglSettings.showStatistics == 'YES'" ng-click='stats.ShowNextPanel()'>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-show="useInputbbox == 'YES' && showOnlyGraphics =='NO'">
+            <div class="table widthFull">
+                <div class="table widthFull">
+                    <div class="row">
+                        <div class="table widthFull">
+                            <div class="cell keyColor" style="width: 70px;"><span ng-bind="bboxTitle[0]"></span></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bboxTitle[1]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbbox.min.x" size="8" /></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bboxTitle[2]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbbox.min.y" size="8" /></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bboxTitle[3]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbbox.min.z" size="8" /></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="table widthFull">
+                            <div class="cell keyColor" style="width: 70px;"><span ng-bind="bboxTitle[4]"></span></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bboxTitle[5]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbbox.max.x" size="8" /></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bboxTitle[6]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbbox.max.y" size="8" /></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bboxTitle[7]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbbox.max.z" size="8" /></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell keyColor">
+                    <input type="checkbox" ng-model="bboxcheck" ng-true-value="'YES'" ng-false-value="'NO'"/>Use Position
+                    <input type="button" value="Create Box" ng-click="CreateBoundingBox(true)"/>
+                    <input type="button" value="Cancel" ng-click="CreateBoundingBox(false)"/>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-show="useInputbsphere == 'YES' && showOnlyGraphics =='NO'">
+            <div class="table widthFull">
+                <div class="table widthFull">
+                    <div class="row">
+                        <div class="table widthFull">
+                            <div class="cell keyColor" style="width: 70px;"><span ng-bind="bsphereTitle[0]"></span></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bsphereTitle[1]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbsphere.min.x" size="8" /></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bsphereTitle[2]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbsphere.min.y" size="8" /></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bsphereTitle[3]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbsphere.min.z" size="8" /></div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="table widthFull">
+                            <div class="cell keyColor" style="width: 70px;"><span ng-bind="bsphereTitle[4]"></span></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bsphereTitle[5]"></span></div>
+                            <div class="cell"><input type="text" style="text-align: center;" ng-model="inputbsphere.max.x" size="8" /></div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bsphereTitle[6]"></span></div>
+                            <div class="cell">
+                                <input id="inputbsphere12" type="text" style="text-align: center;" ng-model="inputbsphere.max.y" size="8" />
+                            </div>
+                            <div class="cell" style="width: 20px;"><span ng-bind="bsphereTitle[7]"></span></div>
+                            <div class="cell">
+                                <input id="inputbsphere13" type="text" style="text-align: center;" ng-model="inputbsphere.max.z" size="8" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cell keyColor">
+                    <input type="checkbox" ng-model="bboxcheck" ng-true-value="'YES'" ng-false-value="'NO'"/>Use Position
+                    <input type="button" value="Create Sphere" ng-click="CreateBoundingSphere(true)"/>
+                    <input type="button" value="Cancel" ng-click="CreateBoundingSphere(false)"/>
+                </div>
+            </div>
+        </div>
+        <!--
+            <div class="row" ng-show="activeMenu == 'itemslist' && showOnlyGraphics =='NO'">
+                <div class="table widthFull">
+                    <div class="cell" itemslist></div>
+                </div>
+            </div>
+        -->
+    </div>
+    <!--<div id="bottomArea" class="table widthLayout" style="border: 1px solid grey; overflow: auto;" ng-show="showBottomPane == 'YES' && showOnlyGraphics =='NO'">
+        <div class="row">
+            <nav id="tab_nav_wrap">
+                <ul class="noselect">
+                    <li>
+                        <a href="#" ng-click="activeBottomPane = 'properties'" ng-style="activeBottomPane === 'properties' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Properties</a>
+                    </li>
+                    <li>
+                        <a href="#" ng-click="activeBottomPane = 'itemslist'" ng-style="activeBottomPane === 'itemslist' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Items List</a>
+                    </li>
+                    <li>
+                        <a href="#" ng-click="activeBottomPane = 'bboxsphere'" ng-style="activeBottomPane === 'bboxsphere' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Bounding Box/Sphere</a>
+                    </li>
+                    <li>
+                        <a href="#" ng-click="activeBottomPane = 'console'" ng-style="activeBottomPane === 'console' ? {'background':'#00AFF5'} : {'background':'#F2F4F4'}">Console</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="row" ng-show="activeBottomPane == 'properties'">
+            <div class="cell noselect" id="propertiesDiv">
+                <div class="cellConsole" properties></div>
+            </div>
+        </div>
+        <div class="row" ng-show="activeBottomPane == 'itemslist'">
+            <div class="cell noselect" id="itemsListDiv">
+                <div class="cellConsole" itemslist></div>
+            </div>
+        </div>
+        <div class="row" ng-show="activeBottomPane == 'bboxsphere'">
+            <div class="cell noselect" id="bboxSphereListDiv">
+                <div class="cellConsole" bboxsphere></div>
+            </div>
+        </div>
+        <div class="row" ng-show="activeBottomPane == 'console'">
+            <div class="cell noselect" id="consoleDiv">
+                <div class="cellConsole" console></div>
+            </div>
+        </div>
+    </div>-->
+    <!--<div id="seqAckDlgBoxTwoBtn" class="dialog-box noselect" style="width: 450px; height: 160px;">
+        <h3 id="seqAckDlgBoxTwoBtnTitle" class="dialog-title">Acknowledgment</h3>
+        <div class="dialog-content">
+            <p style="text-align:center;">You are about to view: {{curSequenceStep.humanReadableName}}</p>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="seqDlgContinue()">Continue</span>
+            <span class="dialog-button" ng-click="seqDlgStop()">Stop</span>
+        </div>
+    </div>
+    <div id="seqAckDlgBoxThreeBtn" class="dialog-box noselect" style="width: 450px; height: 160px;">
+        <h3 id="seqAckDlgBoxThreeBtnTitle" class="dialog-title">Acknowledgment</h3>
+        <div class="dialog-content">
+            <p style="text-align:center;">You have reached the end of the step: {{curSequenceStep.humanReadableName}}</p>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="seqDlgReplay()">Replay</span>
+            <span class="dialog-button" ng-click="seqDlgContinue()" ng-if="!lastStep">Continue</span>
+            <span class="dialog-button" ng-click="seqDlgComplete()" ng-if="lastStep">Complete</span>
+            <span class="dialog-button" ng-click="seqDlgStop()">Stop</span>
+        </div>
+    </div>
+    <div id="insertBranchesDlgBox" class="dialog-box" style="width: 460px; height: 250px;">
+        <h3 id="insertBranchesDlgBoxTitle" class="dialog-title">Insert Branches</h3>
+        <div class="dialog-close" ng-click="hideDialog()">&times;</div>
+        <div class="dialog-content">
+            <span>Name: (Optional)</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ibName" size="55"/>
+            <span>URL:</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ibUrl" size="55" required/>
+            &lt;!&ndash;
+            <span>Template URL: </span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ibTemplateUrl" size="50" />
+            <span>Map URL: </span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ibMapUrl" size="50" />
+            <span>OID: </span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ibOid" size="50" />
+            <span>Markup URL: </span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ibMarkupUrl" size="50" />
+            &ndash;&gt;
+            <span>Recently used:</span>
+            <select
+                    style="width: 400px; top: 5px;"
+                    ng-model="urlSelector"
+                    ng-options="url for url in recentUrlDataSets"
+                    ng-change="SetRecentUrl(urlSelector)">
+            </select>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="ibDlgInsert()">Insert</span>
+        </div>
+    </div>
+    <div id="createCompDlgBox" class="dialog-box" style="width: 460px; height: 300px;">
+        <h3 id="createCompDlgBoxTitle" class="dialog-title">Create Component</h3>
+        <div class="dialog-close" ng-click="hideDialog()">&times;</div>
+        <div class="dialog-content">
+            <span>Name:</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ccName" size="55" required/>
+            <span>Shape Source:</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ccUrl" size="55" required/>
+            <span>ID:</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="ccId" size="55" required/>
+            <span>Recently used:</span>
+            <select
+                    style="width: 400px; top: 5px;"
+                    ng-model="shapeSourceSelector"
+                    ng-options="shapeSource for shapeSource in recentShapeSourceDataSets"
+                    ng-change="SetRecentShapeSource(shapeSourceSelector)">
+            </select>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="ccDlgInsert()">Create</span>
+        </div>
+    </div>
+
+    <div id="customSelectionColorDlgBox" class="dialog-box noselect" style="width: 580px; height: 540px;">
+        <h3 id="customSelectionColorDlgBoxTitle" class="dialog-title">Custom Selection</h3>
+        <div class="dialog-close" ng-click="partColorSelector=0;hideDialog();">&times;</div>
+        <div class="dialog-content">
+            <div style="width: 15%;height:5%; display: inline-block;"><span>Options:</span></div>
+            <label><input type="radio" ng-model="customSelectMode" ng-change="CustomPartSelectionMode(false)" value=1 >Select 1</label>
+            <label><input type="radio" ng-model="customSelectMode" ng-change="CustomPartSelectionMode(false)" value=2 >Select 2</label>
+            <label><input type="radio" ng-model="customSelectMode" ng-change="CustomPartSelectionMode(false)" value=3 >Select 3</label>
+            <label><input type="radio" ng-model="customSelectMode" ng-change="CustomPartSelectionMode(false)" value=4 >Select 4</label>
+            <label><input type="radio" ng-model="customSelectMode" ng-change="CustomPartSelectionMode(false)" value=5 >Select 5</label>
+            <div style="width: 15%;height:5%;display: inline-block;"><span>Style:</span></div>
+            <label><input type="radio" ng-model="customSelectStyle" ng-change="CustomSelectStyleChange()" value="FILL" ng-checked="true">Fill</label>
+            <label><input type="radio" ng-model="customSelectStyle" ng-change="CustomSelectStyleChange()" value="OUTLINE" ng-checked="false">Outline</label>
+            <div ng-click="customSelectPickerDisplay = 0">
+                <div style="cursor:default; height: 22px;">
+                    <span ng-style="customSelectPickerDisplay == 0 ? {'color':'black','font-weight':'bold'}:{'color':'LightGray','font-weight':'normal'}">Fill</span>
+                </div>
+                <div>
+                    <div class="color-display-background"></div>
+                    <div class="color-display" ng-style="GetColorDisplayStyle(customSelectPickerFillColor, partColorSelector)"></div>
+                </div>
+                <div style="font-size: 15px;">
+                    <input style="margin-left: 50px; width: 90px;" type="text" maxlength="9" size="9"
+                           ng-model="customSelectPickerFillColor" ng-focus="customSelectPickerDisplay == 0" ng-style="GetColorHexTextStyle(partColorSelector)">
+                    <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(partColorSelector)">
+                        <span>{{GetColorRGBAText(customSelectPickerFillColor)}}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 3px;" ng-click="customSelectPickerDisplay = 1">
+                <div style="cursor:default; height: 22px;">
+                    <span ng-style="customSelectPickerDisplay == 1 ? {'color':'black','font-weight':'bold'}:{'color':'LightGray','font-weight':'normal'}">Outline</span>
+                </div>
+                <div>
+                    <div class="color-display-background"></div>
+                    <div class="color-display" ng-style="GetColorDisplayStyle(customSelectPickerOutlineColor, partColorSelector)"></div>
+                </div>
+                <div style="font-size: 15px;">
+                    <input style="margin-left: 50px; width: 90px;" type="text" maxlength="9" size="9"
+                           ng-model="customSelectPickerOutlineColor" ng-focus="customSelectPickerDisplay == 1" ng-style="GetColorHexTextStyle(partColorSelector)">
+                    <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(partColorSelector)">
+                        <span>{{GetColorRGBAText(customSelectPickerOutlineColor)}}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 3px;">
+                <color-picker ng-model="customSelectPickerFillColor" ng-show="customSelectPickerDisplay == 0" ng-change="CustomPartSelectionMode(false)"></color-picker>
+                <color-picker ng-model="customSelectPickerOutlineColor" ng-show="customSelectPickerDisplay == 1" ng-change="CustomPartSelectionMode(false)"></color-picker>
+            </div>
+            <div style="width: 15%; display: inline-block; margin-top: 10px;"><span>Width:</span></div>
+            <select ng-model="customSelectWidth"
+                    ng-options="width as width.label for width in customSelectHighlightWidths track by width.id"
+                    ng-change="CustomSelectWidthChange()"
+                    ng-disabled="customSelectStyle == 'FILL'">
+            </select>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="CustomSelectOkApplayPress(false)">Apply</span>
+            <span class="dialog-button" ng-click="CustomSelectOkApplayPress(true)">OK</span>
+            <span class="dialog-button" ng-click="CustomSelectCancelPress()">Cancel</span>
+        </div>
+    </div>
+
+    <div id="partSelectionColorDlgBox" class="dialog-box noselect" style="width: 370px; height: 520px;">
+        <h3 id="partSelectionColorDlgBoxTitle" class="dialog-title">Part Selection Color</h3>
+        <div class="dialog-close" ng-click="partColorSelector=0;hideDialog();">&times;</div>
+        <div class="dialog-content">
+            <div style="width: 15%; display: inline-block;"><span>Style:</span></div>
+            <label><input type="radio" ng-model="selectHighlightStyle" ng-change="PartSelectionColorDlgOK(false)" value="FILL">Fill</label>
+            <label><input type="radio" ng-model="selectHighlightStyle" ng-change="PartSelectionColorDlgOK(false)" value="OUTLINE">Outline</label>
+            <div ng-click="partColorSelector = 1">
+                <div style="cursor:default; height: 22px;">
+                    <span ng-style="partColorSelector == 1 ? {'color':'black','font-weight':'bold'}:{'color':'LightGray','font-weight':'normal'}">Fill</span>
+                </div>
+                <div>
+                    <div class="color-display-background"></div>
+                    <div class="color-display" ng-style="GetColorDisplayStyle(partSelectionFillColor, 1)"></div>
+                </div>
+                <div style="font-size: 15px;">
+                    <input style="margin-left: 50px; width: 90px;" type="text" maxlength="9" size="9"
+                           ng-model="partSelectionFillColor" ng-focus="partColorSelector = 1" ng-style="GetColorHexTextStyle(1)">
+                    <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(1)">
+                        <span>{{GetColorRGBAText(partSelectionFillColor)}}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 3px;" ng-click="partColorSelector = 2">
+                <div style="cursor:default; height: 22px;">
+                    <span ng-style="partColorSelector == 2 ? {'color':'black','font-weight':'bold'}:{'color':'LightGray','font-weight':'normal'}">Outline</span>
+                </div>
+                <div>
+                    <div class="color-display-background"></div>
+                    <div class="color-display" ng-style="GetColorDisplayStyle(partSelectionOutlineColor, 2)"></div>
+                </div>
+                <div style="font-size: 15px;">
+                    <input style="margin-left: 50px; width: 90px;" type="text" maxlength="9" size="9"
+                           ng-model="partSelectionOutlineColor" ng-focus="partColorSelector = 2" ng-style="GetColorHexTextStyle(2)">
+                    <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(2)">
+                        <span>{{GetColorRGBAText(partSelectionOutlineColor)}}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 3px;">
+                <color-picker ng-model="partSelectionFillColor" ng-show="partColorSelector == 1"></color-picker>
+                <color-picker ng-model="partSelectionOutlineColor" ng-show="partColorSelector == 2"></color-picker>
+            </div>
+            <div style="width: 15%; display: inline-block; margin-top: 10px;"><span>Width:</span></div>
+            <select ng-model="highlightSelectWidth"
+                    ng-options="width as width.label for width in highlightSelectWidths track by width.id"
+                    ng-change="PartSelectionColorDlgOK(false)"
+                    ng-disabled="selectHighlightStyle == 'FILL'"></select>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="PartSelectionColorDlgOK(false)">Apply</span>
+            <span class="dialog-button" ng-click="PartSelectionColorDlgOK(true)">OK</span>
+            <span class="dialog-button" ng-click="PartSelectionColorDlgCancel()">Cancel</span>
+        </div>
+    </div>
+
+    <div id="partPreselectionColorDlgBox" class="dialog-box noselect" style="width: 370px; height: 520px;">
+        <h3 id="partPreselectionColorDlgBoxTitle" class="dialog-title">Part Preselection Color</h3>
+        <div class="dialog-close" ng-click="partColorSelector=0;hideDialog()">&times;</div>
+        <div class="dialog-content">
+            <div style="width: 15%; display: inline-block;"><span>Style:</span></div>
+            <label><input type="radio" ng-model="preSelectHighlightStyle" ng-change="PartPreselectionColorDlgOK(false)" value="FILL">Fill</label>
+            <label><input type="radio" ng-model="preSelectHighlightStyle" ng-change="PartPreselectionColorDlgOK(false)" value="OUTLINE">Outline</label>
+            <div ng-click="partColorSelector = 3">
+                <div style="cursor:default; height: 22px;">
+                    <span ng-style="partColorSelector == 3 ? {'color':'black','font-weight':'bold'}:{'color':'LightGray','font-weight':'normal'}">Fill</span>
+                </div>
+                <div>
+                    <div class="color-display-background"></div>
+                    <div class="color-display" ng-style="GetColorDisplayStyle(partPreselectionFillColor, 3)"></div>
+                </div>
+                <div style="font-size: 15px;">
+                    <input style="margin-left: 50px;" type="text" maxlength="9" size="9"
+                           ng-model="partPreselectionFillColor" ng-focus="partColorSelector = 3" ng-style="GetColorHexTextStyle(3)">
+                    <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(3)">
+                        <span>{{GetColorRGBAText(partPreselectionFillColor)}}</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 3px;" ng-click="partColorSelector = 4">
+                <div style="cursor:default; height: 22px;">
+                    <span ng-style="partColorSelector == 4 ? {'color':'black','font-weight':'bold'}:{'color':'LightGray','font-weight':'normal'}">Outline</span>
+                </div>
+                <div>
+                    <div class="color-display-background"></div>
+                    <div class="color-display" ng-style="GetColorDisplayStyle(partPreselectionOutlineColor, 4)"></div>
+                </div>
+                <div style="font-size: 15px;">
+                    <input style="margin-left: 50px;" type="text" maxlength="9" size="9"
+                           ng-model="partPreselectionOutlineColor" ng-focus="partColorSelector = 4" ng-style="GetColorHexTextStyle(4)">
+                    <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(4)">
+                        <span>{{GetColorRGBAText(partPreselectionOutlineColor)}}</span>
+                    </div>
+                </div>
+            </div>
+            <color-picker ng-model="partPreselectionFillColor" ng-show="partColorSelector == 3"></color-picker>
+            <color-picker ng-model="partPreselectionOutlineColor" ng-show="partColorSelector == 4"></color-picker>
+            <div style="width: 15%; display: inline-block; margin-top: 10px;"><span>Width:</span></div>
+            <select ng-model="highlightPreSelectWidth"
+                    ng-options="width as width.label for width in highlightPreSelectWidths track by width.id"
+                    ng-change="PartPreselectionColorDlgOK(false)"
+                    ng-disabled="preSelectHighlightStyle == 'FILL'"></select>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="PartPreselectionColorDlgOK(false)">Apply</span>
+            <span class="dialog-button" ng-click="PartPreselectionColorDlgOK(true)">OK</span>
+            <span class="dialog-button" ng-click="PartPreselectionColorDlgCancel()">Cancel</span>
+        </div>
+    </div>
+
+    <div id="backgroundColorDlgBox" class="dialog-box noselect" ng-style="GetBGColorDlgSize()">
+        <h3 id="backgroundColorDlgBoxTitle" class="dialog-title">Background Color</h3>
+        <div class="dialog-close" ng-click="partColorSelector=0;hideDialog()">&times;</div>
+        <div class="dialog-content">
+            <div>
+                <div style="width: 45%; display: inline-block;"><span>Number of colors:</span></div>
+                <label><input type="radio" ng-model="backgroundColorNum" ng-change="partColorSelector = 7" value="ONE">One</label>
+                <label><input type="radio" ng-model="backgroundColorNum" ng-change="partColorSelector = 5" value="TWO">Two</label>
+            </div>
+            <div ng-show="backgroundColorNum == 'ONE'">
+                <div ng-click="partColorSelector = 7">
+                    <div>
+                        <div class="color-display-background"></div>
+                        <div class="color-display" ng-style="GetColorDisplayStyle(backgroundColor, 7)"></div>
+                    </div>
+                    <div style="font-size: 15px;">
+                        <input style="margin-left: 50px;" type="text" maxlength="9" size="9"
+                               ng-model="backgroundColor" ng-focus="partColorSelector = 7" ng-style="GetColorHexTextStyle(7)">
+                        <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(7)">
+                            <span>{{GetColorRGBAText(backgroundColor)}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="backgroundColorNum == 'TWO'">
+                <div ng-click="partColorSelector = 5">
+                    <div style="cursor:default; height: 22px;">
+                        <span ng-style="partColorSelector == 5 ? {'color':'black','font-weight':'bold'}:{'color':'LightGray','font-weight':'normal'}">Top</span>
+                    </div>
+                    <div>
+                        <div class="color-display-background"></div>
+                        <div class="color-display" ng-style="GetColorDisplayStyle(backgroundTopColor, 5)"></div>
+                    </div>
+                    <div style="font-size: 15px;">
+                        <input style="margin-left: 50px;" type="text" maxlength="9" size="9"
+                               ng-model="backgroundTopColor" ng-focus="partColorSelector = 5" ng-style="GetColorHexTextStyle(5)">
+                        <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(5)">
+                            <span>{{GetColorRGBAText(backgroundTopColor)}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 3px;" ng-click="partColorSelector = 6">
+                    <div style="cursor:default; height: 22px;">
+                        <span ng-style="partColorSelector == 6 ? {'color':'black','font-weight':'bold'}:{'color':'LightGray','font-weight':'normal'}">Bottom</span>
+                    </div>
+                    <div>
+                        <div class="color-display-background"></div>
+                        <div class="color-display" ng-style="GetColorDisplayStyle(backgroundBottomColor, 6)"></div>
+                    </div>
+                    <div style="font-size: 15px;">
+                        <input style="margin-left: 50px;" type="text" maxlength="9" size="9"
+                               ng-model="backgroundBottomColor" ng-focus="partColorSelector = 6" ng-style="GetColorHexTextStyle(6)">
+                        <div style="display: inline-block;" ng-style="GetColorRGBATextStyle(6)">
+                            <span>{{GetColorRGBAText(backgroundBottomColor)}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <color-picker ng-model="backgroundTopColor" ng-show="partColorSelector == 5"></color-picker>
+            <color-picker ng-model="backgroundBottomColor" ng-show="partColorSelector == 6"></color-picker>
+            <color-picker ng-model="backgroundColor" ng-show="partColorSelector == 7"></color-picker>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="BackgroundColorDlgOK(false)">Apply</span>
+            <span class="dialog-button" ng-click="BackgroundColorDlgOK(true)">OK</span>
+            <span class="dialog-button" ng-click="BackgroundColorDlgCancel()">Cancel</span>
+        </div>
+    </div>
+
+    <div id="setPropertyDlgBox" class="dialog-box" style="width: 450px; height: 350px;">
+        <h3 id="setPropertyDlgBoxTitle" class="dialog-title">Set Property</h3>
+        <div class="dialog-close" ng-click="hideDialog()">&times;</div>
+        <div class="dialog-content">
+            <span>Instance</span><input type="text" style="text-align: left; margin-bottom: 5px; background: white;" ng-model="instanceName" size="55" disabled/>
+            <span>Group</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="groupName" size="55" required/>
+            <span>Name</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="propName" size="55" required/>
+            <span>Value</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="propertySetValue" size="55" required/>
+            <span>Result</span><input type="text" id="setPropertyResultInput" style="text-align: left; margin-bottom: 5px;" ng-model="setPropertyResult" size="55" disabled/>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="SetPropertyDlgApply()">Set</span>
+            <span class="dialog-button" ng-click="hideDialog()">Close</span>
+        </div>
+    </div>
+
+    <div id="getPropertyDlgBox" class="dialog-box" style="width: 450px; height: 350px;">
+        <h3 id="getPropertyDlgBoxTitle" class="dialog-title">Get Property</h3>
+        <div class="dialog-close" ng-click="hideDialog()">&times;</div>
+        <div class="dialog-content">
+            <span>Instance</span><input type="text" style="text-align: left; margin-bottom: 5px; background: white;" ng-model="instanceName" size="55" disabled/>
+            <span>Group</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="groupName" size="55"/>
+            <span>Name</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="propName" size="55"/>
+            <span>Value</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="propertyGetValue" size="55" disabled/>
+            <span>Result</span><input type="text" id="getPropertyResultInput" style="text-align: left; margin-bottom: 5px;" ng-model="getPropertyResult" size="55" disabled/>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="GetPropertyDlgApply()">Get</span>
+            <span class="dialog-button" ng-click="hideDialog()">Close</span>
+        </div>
+    </div>
+
+    <div id="findInstancesWithPropertyDlgBox" class="dialog-box" style="width: 450px; height: 300px;">
+        <h3 id="findInstancesWithPropertyDlgBoxTitle" class="dialog-title">Find Instances</h3>
+        <div class="dialog-close" ng-click="hideDialog()">&times;</div>
+        <div class="dialog-content">
+            <span>Group</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="groupName" size="55" required/>
+            <span>Name</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="propName" size="55" required/>
+            <span>Value</span><input type="text" style="text-align: left; margin-bottom: 5px;" ng-model="propertyFindValue" size="55" required/>
+            <span>Result</span><input type="text" id="findPropertyResultInput" style="text-align: left; margin-bottom: 5px;" ng-model="findPropertyResult" size="55" disabled/>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="FindInstancesWithProperty()">Find</span>
+            <span class="dialog-button" ng-click="hideDialog()">Close</span>
+        </div>
+    </div>
+
+    <div id="spatialFilterDlgBox" class="dialog-box noselect" style="width: 510px; height: 275px;">
+        <h3 id="spatialFilterDlgBoxTitle" class="dialog-title">Spatial Filter</h3>
+        <div class="dialog-close" ng-click="SpatialFilterDlgClose()">&times;</div>
+        <div class="dialog-content">
+            <div style="width: 25%; display: inline-block;"><span>Items included:</span></div>
+            <label><input type="radio" ng-model="spatialFilterItemsIncluded" ng-change="UpdateSpatialFilter()" ng-disabled="!currentSpatialFilterBound" value="YES">Contained</label>
+            <label><input type="radio" ng-model="spatialFilterItemsIncluded" ng-change="UpdateSpatialFilter()" ng-disabled="!currentSpatialFilterBound" value="NO">Contained and Crossing</label>
+            <div style="width: 25%; display: inline-block; margin-top: 5px;"><span>Local to:</span></div>
+            <label><input type="radio" ng-model="spatialFilterLocalTo" ng-change="SpatialFilterLocalToChanged()" ng-disabled="!currentSpatialFilterBound" value="Box">Box</label>
+            <label><input type="radio" ng-model="spatialFilterLocalTo" ng-change="SpatialFilterLocalToChanged()" ng-disabled="!currentSpatialFilterBound" value="Sphere">Sphere</label>
+            <div style="width: 100%">
+                <input type="checkbox" style="margin-top: 5px; margin-left: 0px;" id="spatialFilterPreview" ng-click="CheckSpatialFilterPreview()" ng-disabled="!currentSpatialFilterBound" checked />
+                <label for="spatialFilterPreview">Preview</label>
+            </div>
+            <div class="dialog-content-separate" style="margin-top: 5px; margin-bottom: 5px;"></div>
+            <div style="width: 100%;" ng-if="spatialFilterLocalTo == 'Box'">
+                <div style="width: 20%; display: inline-block;"><span>Minimum</span></div>
+                <span>X: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.minx" disabled>
+                <span>Y: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.miny" disabled>
+                <span>Z: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.minz" disabled>
+                <div style="width: 20%; display: inline-block; margin-top: 5px;"><span>Maximum</span></div>
+                <span>X: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.maxx" disabled>
+                <span>Y: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.maxy" disabled>
+                <span>Z: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.maxz" disabled>
+            </div>
+            <div style="width: 100%;" ng-if="spatialFilterLocalTo == 'Sphere'">
+                <div style="width: 20%; display: inline-block;"><span>Center</span></div>
+                <span>X: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.cenx" disabled>
+                <span>Y: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.cenx" disabled>
+                <span>Z: </span><input style="width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.cenx" disabled>
+                <div style="width: 20%; display: inline-block; margin-top: 5px;"><span>Radius:</span></div>
+                <input style="margin-left: 19px; width: 80px; text-align:center;" type="text" maxlength="9" size="9" ng-model="currentSpatialFilterBound.radius" disabled>
+            </div>
+            <div class="dialog-content-separate" style="margin-top: 5px; margin-bottom: 5px;"></div>
+            <div style="width: 30%; display: inline-block;"><span>Filtered items: </span></div>
+            <div style="display: inline-block;"><span>{{spatialFilterResult.filteredItemsNum}}</span></div>
+            <div style="margin-left: 10px; width: 35%; display: inline-block; border: 1px solid grey; color: black; text-align: center; cursor: pointer;"
+                 ng-click="ShowFilterResult()">Show items list</div>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="SpatialFilterDlgClose()">Close</span>
+        </div>
+    </div>
+
+    <div id="leaderLinePropertiesDlgBox" class="dialog-box" style="width: 350px; height: 520px;">
+        <h3 id="leaderLinePropertiesDlgBoxTitle" class="dialog-title">Leader Line Properties</h3>
+        <div class="dialog-close" ng-click="HideLeaderLinePropertiesDialog(false)">&times;</div>
+        <div class="dialog-content">
+            <div style="width: 20%; display: inline-block;"><span>Color:</span></div>
+            <div class="color-display-background"></div>
+            <div class="color-display" ng-style="GetColorDisplayStyle(currentLeaderLineColor, 99)"></div>
+            <input style="margin-left: 50px; width: 80px; border:1px solid black; color: black; text-transform: uppercase;"
+                   type="text" maxlength="7" size="7" ng-model="currentLeaderLineColor">
+            <div style="text-align: center; margin-top: 5px;">
+                <color-picker ng-model="currentLeaderLineColor"></color-picker>
+            </div>
+            <div style="width: 50%; display: inline-block; margin-top: 10px;"><span>Line Width:</span></div>
+            <select
+                    ng-model="leaderLineWidth"
+                    ng-options="width as width.label for width in leaderLineWidths track by width.id"
+                    ng-change="ApplyLeaderLineProperties()">
+            </select>
+            <img ng-src="{{GetLeaderlineWidthIcon(leaderLineWidth)}}"/>
+            <div style="width: 50%; display: inline-block; margin-top: 10px;"><span>Line Style:</span></div>
+            <select
+                    ng-model="leaderLineStyle"
+                    ng-options="style as style.label for style in leaderLineStyles track by style.id"
+                    ng-change="ApplyLeaderLineProperties()">
+            </select>
+            <div style="width: 50%; display: inline-block; margin-top: 10px;"><span>Leader Line Head:</span></div>
+            <select
+                    ng-model="leaderLineHead"
+                    ng-options="cap as cap.label for cap in leaderLineEndCaps track by cap.id"
+                    ng-change="ApplyLeaderLineProperties()">
+            </select>
+            <img ng-src="{{GetLeaderlineHeadCapIcon(leaderLineHead)}}"/>
+            <div style="width: 50%; display: inline-block; margin-top: 10px;"><span>Leader Line Tail:</span></div>
+            <select
+                    ng-model="leaderLineTail"
+                    ng-options="cap as cap.label for cap in leaderLineEndCaps track by cap.id"
+                    ng-change="ApplyLeaderLineProperties()">
+            </select>
+            <img ng-src="{{GetLeaderlineTailCapIcon(leaderLineTail)}}"/>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="SaveLeaderLine()">OK</span>
+            <span class="dialog-button" ng-click="HideLeaderLinePropertiesDialog(false)">Cancel</span>
+        </div>
+    </div>
+
+    <div id="shapeFiltersDlgBox" class="dialog-box" style="width: 450px; height: 400px;">
+        <h3 id="shapeFiltersDlgBoxTitle" class="dialog-title">Shape Filters</h3>
+        <div class="dialog-close" ng-click="hideDialog()">&times;</div>
+        <div class="dialog-content">
+            <div>Show in</div>
+            <div style="display: table; font-size: 13px;">
+                <div class="row">
+                    <div style="display: table-cell; width: 45%;">
+                        <div style="display: table;">
+                            <div class="row">
+                                <div style="display: table-cell;">
+                                    <div style="display: table;">
+                                        <div class="row">
+                                            <div style="display: table-cell;">
+                                                <input style="margin-bottom: 10px;" type="checkbox" ng-click="CheckModelGeomParent()" id="sfModelGeometry"/>Model Geometry
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div style="display: table-cell;">
+                                                <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelGeomChildren()" id="sfMGSolids"/>Solids
+                                                <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelGeomChildren()" id="sfMGSurfaces"/>Surfaces<br/>
+                                                <input style="margin-left: 20px; margin-bottom: 20px;" type="checkbox" ng-click="CheckModelGeomChildren()" id="sfMGCosmetics"/>Cosmetics
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div style="display: table-cell;">
+                                    <div style="display: table-cell;">
+                                        <div style="display: table;">
+                                            <div class="row">
+                                                <div style="display: table-cell;">
+                                                    <input style="margin-bottom: 10px;" type="checkbox" ng-click="CheckModelAnnoParent()" id="sfModelAnnotations"/>Model Annotations
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div style="display: table-cell;">
+                                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelAnnoChildren()" id="sfMAPlanarAnnotations"/>Planar Annotations<br/>
+                                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelAnnoChildren()" id="sfMAFloatingAnnotations"/>Floating Annotations<br/>
+                                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelAnnoChildren()" id="sfMAMiscAnnotations"/>Misc Annotations<br/>
+                                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelAnnoChildren()" id="sfMAScreenAnnotations"/>Screen Annotations<br/>
+                                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelAnnoChildren()" id="sfMAHiddenByDefault"/>Hidden by Default
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: table-cell; width: 60%;">
+                        <div style="display: table">
+                            <div class="row">
+                                <div style="display: table-cell">
+                                    <input style="margin-bottom: 10px;" type="checkbox" ng-click="CheckModelConstGeomParent()" id="sfModelConstructionGeometry"/>Model Construction Geometry
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div style="display: table-cell">
+                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelConstGeomChildren()" id="sfMCGSurfaces"/>Surfaces<br/>
+                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelConstGeomChildren()" id="sfMCGCosmetics"/>Cosmetics<br/>
+                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelConstGeomChildren()" id="sfMCGDatumPlanes"/>Datum Planes<br/>
+                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelConstGeomChildren()" id="sfMCGDatumCurves"/>Datum Curves<br/>
+                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelConstGeomChildren()" id="sfMCGDatumAxes"/>Datum Axes<br/>
+                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelConstGeomChildren()" id="sfMCGDatumPoints"/>Datum Points<br/>
+                                    <input style="margin-left: 20px; margin-bottom: 10px;" type="checkbox" ng-click="CheckModelConstGeomChildren()" id="sfMCGCoordSystems"/>Coordinate Systems
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="ShapeFiltersDlgOK(false)">Apply</span>
+            <span class="dialog-button" ng-click="ShapeFiltersDlgOK(true)">OK</span>
+            <span class="dialog-button" ng-click="hideDialog()">Cancel</span>
+        </div>
+    </div>
+    <nav id="context-menu" class="context-menu" ng-if="!(GetContextMenuType() === 'document' && totalPageNo <= 1)">
+        <ul class="context-menu__items" ng-if="GetContextMenuType() === 'structure' || GetContextMenuType() === 'view'">
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextStructureMenu('ZoomAll')" class="context-menu__link">Zoom All</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('ZoomSel')" class="context-menu__link">Zoom Selected</a>
+            </li>
+            <li class="context-menu__separate" ng-if="GetContextMenuType() === 'structure'">
+            <li class="context-menu__item" ng-if="GetContextMenuType() === 'structure'">
+                <a href="#" ng-click="ContextStructureMenu('Collapse')" class="context-menu__link">Collapse Selected</a>
+            </li>
+            <li class="context-menu__separate">
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('Hide')" class="context-menu__link">Hide</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('Show')" class="context-menu__link">Show</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextStructureMenu('ShowAll')" class="context-menu__link">Show All</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('Isolate')" class="context-menu__link">Isolate</a>
+            </li>
+            <li class="context-menu__separate" ng-if="instanceSelector != ''">
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('Phantom')" class="context-menu__link">Set Phantom</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('Shaded')" class="context-menu__link">Set Shaded</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('UnSetRM')" class="context-menu__link">Unset RenderMode</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('Transparent1_0')" class="context-menu__link">Set Transparent(1.0)</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('Transparent0_5')" class="context-menu__link">Set Transparent(0.5)</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('UnSetT')" class="context-menu__link">Unset Transparent</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('CustomSelect1')" class="context-menu__link">Custom Select 1</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('CustomSelect2')" class="context-menu__link">Custom Select 2</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('CustomSelect3')" class="context-menu__link">Custom Select 3</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('CustomSelect4')" class="context-menu__link">Custom Select 4</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('CustomSelect5')" class="context-menu__link">Custom Select 5</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('CustomUnSelectAll')" class="context-menu__link">Custom UnSelect All</a>
+            </li>
+            <li class="context-menu__separate" ng-if="instanceSelector != ''">
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('ShadowCastOff')" class="context-menu__link">Shadow Cast Off</a>
+            </li>
+            <li class="context-menu__item" ng-if="instanceSelector != ''">
+                <a href="#" ng-click="ContextStructureMenu('UnsetShadowCast')" class="context-menu__link">Unset Shadow Cast</a>
+            </li>
+            <li class="context-menu__separate" ng-if="GetContextMenuType() === 'structure'">
+            <li class="context-menu__item" ng-if="GetContextMenuType() === 'structure'">
+                <a href="#" ng-click="ContextStructureMenu('LoadParts')" class="context-menu__link">Load Selected</a>
+            </li>
+            <li class="context-menu__separate" ng-if="StructureEditOn()">
+            <li class="context-menu__item" ng-if="StructureEditOn()">
+                <a href="#" ng-click="ContextStructureMenu('Remove')" class="context-menu__link">Remove</a>
+            </li>
+            <li class="context-menu__item" ng-if="StructureEditOn()">
+                <a href="#" ng-click="ContextStructureMenu('InsertBranch')" class="context-menu__link">Insert Branches</a>
+            </li>
+            <li class="context-menu__item" ng-if="StructureEditOn()">
+                <a href="#" ng-click="ContextStructureMenu('CreateComp')" class="context-menu__link">Create Comp</a>
+            </li>
+        </ul>
+        <ul class="context-menu__items" ng-if="GetContextMenuType() === 'modelAnnotations'">
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextFeatureMenu('ShowAll')" class="context-menu__link">Show All</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextFeatureMenu('HideAll')" class="context-menu__link">Hide All</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextFeatureMenu('ShowMarkupId')" class="context-menu__link">Test Show Markup Id</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextFeatureMenu('Show')" class="context-menu__link">Show</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextFeatureMenu('Hide')" class="context-menu__link">Hide</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextFeatureMenu('Isolate')" class="context-menu__link">Isolate</a>
+            </li>
+            &lt;!&ndash;
+            <li class="context-menu__separate">
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextFeatureMenu('Restore')" class="context-menu__link">Restore Defaults</a>
+            </li>
+            &ndash;&gt;
+            <li class="context-menu__separate">
+            <li class="context-menu__item" ng-if="!ShowFeatureMarkups()">
+                <a href="#" ng-click="ContextFeatureMenu('ShowMarkups')" class="context-menu__link">Show Markups</a>
+            </li>
+            <li class="context-menu__item" ng-if="ShowFeatureMarkups()">
+                <a href="#" ng-click="ContextFeatureMenu('HideMarkups')" class="context-menu__link">Hide Markups</a>
+            </li>
+            <li class="context-menu__item" ng-if="!ShowFeatureFaces()">
+                <a href="#" ng-click="ContextFeatureMenu('ShowFaces')" class="context-menu__link">Show Faces</a>
+            </li>
+            <li class="context-menu__item" ng-if="ShowFeatureFaces()">
+                <a href="#" ng-click="ContextFeatureMenu('HideFaces')" class="context-menu__link">Hide Faces</a>
+            </li>
+        </ul>
+        <ul class="context-menu__items" ng-if="GetContextMenuType() === 'markup'">
+            <li class="context-menu__item" ng-if="leaderlines.length">
+                <a href="#" ng-click="ContextMarkupMenu('RemoveLeaderlines')" class="context-menu__link">Remove Leaderlines</a>
+            </li>
+            <li class="context-menu__item" ng-if="boundMarkers.length">
+                <a href="#" ng-click="ContextMarkupMenu('RemoveBoundingBoxes')" class="context-menu__link">Remove Bounding Boxes</a>
+            </li>
+        </ul>
+        <ul class="context-menu__items" ng-if="GetContextMenuType() === 'selinstances'">
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextSelInstancesMenu('ClearSelection')" class="context-menu__link">Clear Selection</a>
+            </li>
+        </ul>
+        <ul class="context-menu__items" ng-if="GetContextMenuType() === 'layer'">
+            <li class="context-menu__item" ng-if="GetLayerVisibilityContext()">
+                <a href="#" ng-click="ContextLayerMenu('SetVisible')" class="context-menu__link">Set Visible</a>
+            </li>
+            <li class="context-menu__item" ng-if="GetLayerVisibilityContext()">
+                <a href="#" ng-click="ContextLayerMenu('SetHidden')" class="context-menu__link">Set Hidden</a>
+            </li>
+            <li class="context-menu__separate" ng-if="GetLayerVisibilityContext()">
+            <li class="context-menu__item" ng-if="selectedLayer != undefined">
+                <a href="#" ng-click="ContextLayerMenu('ForceVisible')" class="context-menu__link">Force Visible</a>
+            </li>
+            <li class="context-menu__item" ng-if="selectedLayer != undefined">
+                <a href="#" ng-click="ContextLayerMenu('ForceHidden')" class="context-menu__link">Force Hidden</a>
+            </li>
+            <li class="context-menu__separate" ng-if="selectedLayer != undefined">
+            <li class="context-menu__item" ng-if="selectedLayer != undefined && selectedLayer.overrides != undefined">
+                <a href="#" ng-click="ContextLayerMenu('Reset')" class="context-menu__link">Reset to Original</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextLayerMenu('ResetAll')" class="context-menu__link">Reset All to Original</a>
+            </li>
+        </ul>
+        <ul class="context-menu__items" ng-if="GetContextMenuType() === 'spatialfilter'">
+            <li class="context-menu__item" ng-if="spatialFilterResult.filteredItemsNum">
+                <a href="#" ng-click="ContextSpatialFilterResultsMenu('ZoomAll')" class="context-menu__link">Zoom All</a>
+            </li>
+            <li class="context-menu__separate" ng-if="spatialFilterResult.filteredItemsNum">
+            <li class="context-menu__item" ng-if="spatialFilterResult.filteredItemsNum">
+                <a href="#" ng-click="ContextSpatialFilterResultsMenu('ColorCodeAll')" class="context-menu__link">Color Code All</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextSpatialFilterResultsMenu('ClearColorCode')" class="context-menu__link">Clear Color Coding</a>
+            </li>
+            <li class="context-menu__separate">
+            <li class="context-menu__item" ng-if="spatialFilterResult.filteredItemsNum">
+                <a href="#" ng-click="ContextSpatialFilterResultsMenu('ShowQuery')" class="context-menu__link">Show Query</a>
+            </li>
+            <li class="context-menu__separate" ng-if="spatialFilterResult.filteredItemsNum">
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextSpatialFilterResultsMenu('ClearResults')" class="context-menu__link">Clear Results</a>
+            </li>
+        </ul>
+        <ul class="context-menu__items" ng-if="GetContextMenuType() === 'document'">
+            <li class="context-menu__item" ng-if="currentPageNo != 1 && totalPageNo > 1">
+                <a href="#" ng-click="ContextDocumentMenu('First')" class="context-menu__link">First</a>
+            </li>
+            <li class="context-menu__item" ng-if="currentPageNo != 1 && totalPageNo > 1">
+                <a href="#" ng-click="ContextDocumentMenu('Previous')" class="context-menu__link">Previous</a>
+            </li>
+            <li class="context-menu__item" ng-if="currentPageNo != totalPageNo && totalPageNo > 1">
+                <a href="#" ng-click="ContextDocumentMenu('Next')" class="context-menu__link">Next</a>
+            </li>
+            <li class="context-menu__item" ng-if="currentPageNo != totalPageNo && totalPageNo > 1">
+                <a href="#" ng-click="ContextDocumentMenu('Last')" class="context-menu__link">Last</a>
+            </li>
+        </ul>
+        <ul class="context-menu__items" ng-if="GetContextMenuType() === 'properties'">
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextPropertyMenu('SetProperty')" class="context-menu__link">Set Property</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextPropertyMenu('GetProperty')" class="context-menu__link">Get Property</a>
+            </li>
+            <li class="context-menu__item">
+                <a href="#" ng-click="ContextPropertyMenu('FindProperty')" class="context-menu__link">Find Instances</a>
+            </li>
+            <li class="context-menu__item" ng-if="foundIds.length > 0">
+                <a href="#" ng-click="ContextPropertyMenu('ClearFindResult')" class="context-menu__link">Clear Result</a>
+            </li>
+        </ul>
+    </nav>
+    <div class="paneButtons noselect">
+        <input class="primaryPane" title="Toggle primary panel" type="button" ng-style="GetPaneButtonStyle('primary')" ng-click="ShowPane('primary')" />
+        <input class="secondaryPane" title="Toggle secondary panel" type="button" ng-style="GetPaneButtonStyle('secondary')" ng-click="ShowPane('secondary')" />
+        <input class="bottomPane" title="Toggle bottom panel" type="button" ng-style="GetPaneButtonStyle('bottom')" ng-click="ShowPane('bottom')" />
+        <input class="onlyGraphicsArea" title="Only Graphics Area" type="button" ng-style="GetPaneButtonStyle('onlyGraphics')" ng-click="ShowPane('onlyGraphics')" />
+    </div>-->
+</div>
+
+<script>
+    var dropbox;
+
+    window.onload = function() {
+        dropbox = document.getElementById("parentVizDiv");
+        dropbox.addEventListener("dragenter", dragenter, false);
+        dropbox.addEventListener("dragover", dragover, false);
+        dropbox.addEventListener("drop", drop, false);
+
+        openIndexDb();
+        //resizeBody();
+
+        let baseUrl = window.location.protocol + '//';
+        if (window.location.hostname) {
+            baseUrl += window.location.hostname;
+            if (window.location.port.length)
+                baseUrl += ':' + window.location.port + '/';
+            else
+                baseUrl += '/';
+        }
+
+        angular.element(document.getElementById('app')).scope().pvsUrl = baseUrl;
+        angular.element(document.getElementById('app')).scope().pvsBaseUrl = baseUrl;
+    }
+
+    function resizeBody() {
+        /*let windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+        let windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+        let headMenuHeight = document.getElementById("headMenu").offsetHeight;
+        let ribbonMenuHeight = document.getElementById("ribbonMenu").offsetHeight;
+        let bottomAreaHeight = document.getElementById("bottomArea").offsetHeight;
+        let modelsMenuChildrenTopHeight = document.getElementById("modelsMenuChildrenTop").offsetHeight;
+
+        let height = windowHeight - headMenuHeight - ribbonMenuHeight - bottomAreaHeight - 4;
+
+        document.getElementById("middleArea").style.height = height;
+        document.getElementById("modelsMenuChildrenBottom").style.top = headMenuHeight + modelsMenuChildrenTopHeight - 5;
+        document.getElementById("modelsMenuChildrenBottom").style.maxHeight = windowHeight - modelsMenuChildrenTopHeight - headMenuHeight - 4;
+        document.getElementById("settingsMenuChildren").style.maxHeight = windowHeight - headMenuHeight - 4;
+        document.getElementById("propertiesDiv").style.maxWidth = windowWidth - 2;
+
+        var progressDivHeight = document.getElementById("progressDiv").offsetHeight;
+        var viewHeight = height - progressDivHeight;
+        if (document.getElementById("view1") != undefined)
+            document.getElementById("view1").style.height = viewHeight;
+        var spinnerElem = document.getElementById("spinnerDiv");
+        if (spinnerElem) {
+            spinnerElem.style.marginTop = viewHeight * 0.4;
+        }
+
+        let primaryPaneTitleHeight = document.getElementById("primaryPaneTitle").offsetHeight;
+        let primaryPaneHeight = height - primaryPaneTitleHeight - 2;
+
+        let treeDivElem = document.getElementById("treeDiv");
+        if (treeDivElem) {
+            treeDivElem.style.height = primaryPaneHeight;
+        }
+
+        let primaryPanes = document.getElementsByName("primaryPanes");
+        if (primaryPanes) {
+            for (let i=0; i<primaryPanes.length; i++) {
+                primaryPanes[i].style.height = primaryPaneHeight;
+            }
+        }
+
+        let secondaryPaneTitleHeight = document.getElementById("secondaryPaneTitle").offsetHeight;
+        let secondaryPaneHeight = height - secondaryPaneTitleHeight - 2;
+
+        let modelAnnotationsDivElem = document.getElementById("modelAnnotationsDiv");
+        if (modelAnnotationsDivElem) {
+            modelAnnotationsDivElem.style.height = secondaryPaneHeight;
+        }
+
+        let secondaryPanes = document.getElementsByName("secondaryPanes");
+        if (secondaryPanes) {
+            for (let i=0; i<secondaryPanes.length; i++) {
+                secondaryPanes[i].style.height = secondaryPaneHeight;
+            }
+        }*/
+    }
+
+    function resizeSettings() {
+        let spanOneElem = document.getElementById("longestSettingsSpanOne");
+        let divOneelem = document.getElementById("longestSettingsDivOne");
+        let spanTwoElem = document.getElementById("longestSettingsSpanTwo");
+        let divTwoElem = document.getElementById("longestSettingsDivTwo");
+
+        let width = spanOneElem.getBoundingClientRect().width
+            + divOneelem.getBoundingClientRect().width
+            + spanTwoElem.getBoundingClientRect().width
+            + divTwoElem.getBoundingClientRect().width
+            + 25;
+
+        document.getElementById("settingsMenuChildren").style.width = width;
+    }
+
+    function dragenter(e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    function dragover(e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+
+    function drop(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        var dt = e.dataTransfer;
+        var file = dt.files[0];
+        if (file == undefined) return;
+
+        var reader = new FileReader();
+        reader.filename = file.name;
+        reader.onload = function () {
+            var arrayBuffer = reader.result;
+            angular.element(document.getElementById('app')).scope().LoadModel(reader.filename, arrayBuffer);
+            storeDataSet(file.name, arrayBuffer);
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function openIndexDb() {
+        if (window.location.protocol.indexOf('file') != -1) return;
+        if (window.indexedDB) {
+            var request = window.indexedDB.open("FileCacheDatabase", 2);
+            request.onupgradeneeded = function(event) {
+                dbFileCache = request.result;
+                if (dbFileCache.objectStoreNames.contains("FileCacheObjectStore")) {
+                    var txn = event.target.transaction;
+                    var objectstore = txn.objectStore("FileCacheObjectStore");
+                    objectstore.clear();
+                } else {
+                    var store = dbFileCache.createObjectStore("FileCacheObjectStore", {keyPath: "id"});
+                    store.createIndex("timestamp", "timestamp", { unique: false });
+                }
+            };
+            request.onsuccess = function(event) {
+                dbFileCache = request.result;
+                var tx = dbFileCache.transaction(["FileCacheObjectStore"], "readwrite");
+                store = tx.objectStore("FileCacheObjectStore");
+                tx.oncomplete = function() {
+                    listFileCacheData();
+                };
+            };
+
+            var request2 = window.indexedDB.open("RecentPVSDatabase", 1);
+            request2.onupgradeneeded = function() {
+                dbRecentPVS = request2.result;
+                var store2 = dbRecentPVS.createObjectStore("RecentPVSObjectStore", {keyPath: "url"});
+            };
+            request2.onsuccess = function(event) {
+                dbRecentPVS = request2.result;
+                var tx2 = dbRecentPVS.transaction(["RecentPVSObjectStore"], "readwrite");
+                store2 = tx2.objectStore("RecentPVSObjectStore");
+                tx2.oncomplete = function() {
+                    listRecentPVSData();
+                };
+            };
+
+            var request3 = window.indexedDB.open("RecentShapeSourceDatabase", 1);
+            request3.onupgradeneeded = function() {
+                dbRecentShapeSource = request3.result;
+                var store3 = dbRecentShapeSource.createObjectStore("RecentShapeSourceObjectStore", {keyPath: "url"});
+            };
+            request3.onsuccess = function(event) {
+                dbRecentShapeSource = request3.result;
+                var tx3 = dbRecentShapeSource.transaction(["RecentShapeSourceObjectStore"], "readwrite");
+                store3 = tx3.objectStore("RecentShapeSourceObjectStore");
+                tx3.oncomplete = function() {
+                    listRecentShapeSourceData();
+                };
+            };
+
+            var request4 = window.indexedDB.open("RecentPVSURLDatabase", 2);
+            request4.onupgradeneeded = function(event) {
+                dbRecentPVSURL = request4.result;
+
+                if (dbRecentPVSURL.objectStoreNames.contains("RecentPVSURLObjectStore")) {
+                    var txn = event.target.transaction;
+                    var objectstore = txn.objectStore("RecentPVSURLObjectStore");
+                    objectstore.clear();
+                } else {
+                    var store4 = dbRecentPVSURL.createObjectStore("RecentPVSURLObjectStore", {keyPath: "name"});
+                    store4.createIndex("timestamp", "timestamp", { unique: false });
+                }
+            };
+            request4.onsuccess = function(event) {
+                dbRecentPVSURL = request4.result;
+                var tx4 = dbRecentPVSURL.transaction(["RecentPVSURLObjectStore"], "readwrite");
+                store4 = tx4.objectStore("RecentPVSURLObjectStore");
+                tx4.oncomplete = function() {
+                    listRecentPVSURLData();
+                };
+            };
+
+            var request5 = window.indexedDB.open("WebglSettingsDatabase", 1);
+            request5.onupgradeneeded = function(event) {
+                dbWebglSettings = request5.result;
+
+                if (dbWebglSettings.objectStoreNames.contains("WebglSettingsObjectStore")) {
+                    var txn = event.target.transaction;
+                    var objectstore = txn.objectStore("WebglSettingsObjectStore");
+                    objectstore.clear();
+                } else {
+                    dbWebglSettings.createObjectStore("WebglSettingsObjectStore", {keyPath: "key"});
+                }
+            };
+            request5.onsuccess = function(event) {
+                dbWebglSettings = request5.result;
+                var tx5 = dbWebglSettings.transaction(["WebglSettingsObjectStore"], "readwrite");
+                tx5.objectStore("WebglSettingsObjectStore");
+                tx5.oncomplete = function() {
+                    listWebglSettings();
+                };
+            }
+        } else {
+            console.log("indexDB not supported");
+        }
+    }
+
+    function listFileCacheData() {
+        var request = window.indexedDB.open("FileCacheDatabase", 2);
+        request.onsuccess = function(event) {
+            dbFileCache = request.result;
+            var tx = dbFileCache.transaction(["FileCacheObjectStore"], "readwrite");
+            var store = tx.objectStore("FileCacheObjectStore");
+            var timeIndex = store.index("timestamp");
+            timeIndex.openCursor(null, 'prev').onsuccess = function(event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    let obj = {id: cursor.value.id, timestamp: cursor.value.timestamp};
+                    angular.element(document.getElementById('app')).scope().availableDataSets.push(obj);
+                    cursor.continue();
+                } else {
+                    angular.element(document.getElementById('app')).scope().UpdateModelsList();
+                }
+            }
+        }
+    }
+
+    function listRecentPVSData() {
+        var request = window.indexedDB.open("RecentPVSDatabase", 1);
+        request.onsuccess = function(event) {
+            dbRecentPVS = request.result;
+            var tx = dbRecentPVS.transaction(["RecentPVSObjectStore"], "readwrite");
+            store = tx.objectStore("RecentPVSObjectStore");
+            openCursorReq = store.openCursor();
+            openCursorReq.onsuccess = function(event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    angular.element(document.getElementById('app')).scope().recentUrlDataSets.push(cursor.key);
+                    cursor.continue();
+                }
+            }
+        }
+    }
+
+    function listRecentShapeSourceData() {
+        var request = window.indexedDB.open("RecentShapeSourceDatabase", 1);
+        request.onsuccess = function(event) {
+            dbRecentShapeSource = request.result;
+            var tx = dbRecentShapeSource.transaction(["RecentShapeSourceObjectStore"], "readwrite");
+            store = tx.objectStore("RecentShapeSourceObjectStore");
+            openCursorReq = store.openCursor();
+            openCursorReq.onsuccess = function(event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    angular.element(document.getElementById('app')).scope().recentShapeSourceDataSets.push(cursor.key);
+                    cursor.continue();
+                }
+            }
+        }
+    }
+
+    function listRecentPVSURLData() {
+        var request = window.indexedDB.open("RecentPVSURLDatabase", 2);
+        request.onsuccess = function(event) {
+            dbRecentPVSURL = request.result;
+            var tx = dbRecentPVSURL.transaction(["RecentPVSURLObjectStore"], "readwrite");
+            var store = tx.objectStore("RecentPVSURLObjectStore");
+            var timeIndex = store.index("timestamp");
+            timeIndex.openCursor(null, 'prev').onsuccess = function(event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    let obj = {name: cursor.value.name, timestamp: cursor.value.timestamp};
+                    angular.element(document.getElementById('app')).scope().availablePVSUrls.push(obj);
+                    cursor.continue();
+                } else {
+                    angular.element(document.getElementById('app')).scope().UpdateModelsList();
+                }
+            }
+        }
+    }
+
+    function listWebglSettings() {
+        var request = window.indexedDB.open("WebglSettingsDatabase", 1);
+        request.onsuccess = function(event) {
+            dbWebglSettings = request.result;
+            var tx = dbWebglSettings.transaction(["WebglSettingsObjectStore"], "readwrite");
+            var store = tx.objectStore("WebglSettingsObjectStore");
+            openCursorReq = store.openCursor();
+            openCursorReq.onsuccess = function(event) {
+                var cursor = event.target.result;
+                if (cursor) {
+                    angular.element(document.getElementById('app')).scope().SetWebglSettings(cursor.value);
+                    cursor.continue();
+                }
+            }
+        }
+    }
+
+
+    function storeDataSet(fileName, buffer) {
+        if (window.location.protocol.indexOf('file') != -1) return;
+        if (window.indexedDB) {
+            var request = window.indexedDB.open("FileCacheDatabase", 2);
+            request.onsuccess = function(event) {
+                dbFileCache = request.result;
+                var tx = dbFileCache.transaction(["FileCacheObjectStore"], "readwrite");
+                store = tx.objectStore("FileCacheObjectStore");
+                var timeStamp = Math.floor(Date.now() / 1000);
+                store.put({id: fileName, name: buffer, timestamp: timeStamp});
+                let obj = {id: fileName, timestamp: timeStamp};
+                angular.element(document.getElementById('app')).scope().availableDataSets.push(obj);
+                angular.element(document.getElementById('app')).scope().UpdateModelsList();
+            }
+        } else {
+            console.log("indexDB not supported");
+        }
+    }
+
+    function storeRecentUrl(url) {
+        if (window.location.protocol.indexOf('file') != -1) return;
+        if (window.indexedDB) {
+            var request = window.indexedDB.open("RecentPVSDatabase", 1);
+            request.onsuccess = function(event) {
+                dbRecentPVS = request.result;
+                var tx = dbRecentPVS.transaction(["RecentPVSObjectStore"], "readwrite");
+                store = tx.objectStore("RecentPVSObjectStore");
+                store.put({url: url});
+                angular.element(document.getElementById('app')).scope().recentUrlDataSets.push(url);
+            }
+        } else {
+            console.log("indexDB not supported");
+        }
+    }
+
+    function storeRecentShapeSource(url) {
+        if (window.location.protocol.indexOf('file') != -1) return;
+        if (window.indexedDB) {
+            var request = window.indexedDB.open("RecentShapeSourceDatabase", 1);
+            request.onsuccess = function(event) {
+                dbRecentShapeSource = request.result;
+                var tx = dbRecentShapeSource.transaction(["RecentShapeSourceObjectStore"], "readwrite");
+                store = tx.objectStore("RecentShapeSourceObjectStore");
+                store.put({url: url});
+                angular.element(document.getElementById('app')).scope().recentShapeSourceDataSets.push(url);
+            }
+        } else {
+            console.log("indexDB not supported");
+        }
+    }
+
+    function storeRecentPVSUrl(url) {
+        if (window.location.protocol.indexOf('file') != -1) return;
+
+        var fileName;
+        var n = url.lastIndexOf('/');
+        if (n != -1) {
+            fileName = url.substr(n+1);
+        }
+        if (fileName.length == 0) return;
+
+        if (window.indexedDB) {
+            var request = window.indexedDB.open("RecentPVSURLDatabase", 2);
+            request.onsuccess = function(event) {
+                dbRecentPVSURL = request.result;
+                var tx = dbRecentPVSURL.transaction(["RecentPVSURLObjectStore"], "readwrite");
+                store = tx.objectStore("RecentPVSURLObjectStore");
+                var timeStamp = Math.floor(Date.now() / 1000);
+                store.put({name: fileName, url: url, timestamp: timeStamp});
+                let obj = {name: fileName, timestamp: timeStamp};
+                angular.element(document.getElementById('app')).scope().availablePVSUrls.push(obj);
+                angular.element(document.getElementById('app')).scope().UpdateModelsList();
+            }
+        } else {
+            console.log("indexDB not supported");
+        }
+    }
+
+    window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+    window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+    if (!window.indexedDB) {
+        console.log("Your browser doesn't support a stable version of IndexedDB.")
+    }
+
+    // Context menu
+    function getPosition(e) {
+        var posx = 0;
+        var posy = 0;
+
+        if (!e) var e = window.event;
+
+        if (e.pageX || e.pageY) {
+            posx = e.pageX;
+            posy = e.pageY;
+        } else if (e.clientX || e.clientY) {
+            posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+            posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+        }
+
+        return {
+            x: posx,
+            y: posy
+        }
+    }
+
+    var mouseDownX;
+    var mouseDownY;
+    var mouseContextTime;
+    var mouseDownTime;
+    var mouseUpTime;
+    var jitterLimit = 3;
+    var timeLimit = 200;
+
+    var leftDown = false;
+    var middleDown = false;
+    var rightDown = false;
+
+    function handleContextMouseDown(evt) {
+        mouseContextTime = undefined;
+        mouseDownTime = undefined;
+        mouseUpTime = undefined;
+
+        angular.element(document.getElementById('app')).scope().ShowContextMenu(false);
+        if (evt.button == 0) { // Left button
+            leftDown = true;
+        } else if (evt.button == 1) { // Middle
+            middleDown = true;
+        } else if (evt.button == 2) { // Right
+            rightDown = true;
+            var downCoords = getPosition(evt);
+            mouseDownX = downCoords.x;
+            mouseDownY = downCoords.y;
+            mouseDownTime = Date.now();
+        }
+    }
+
+    function handleContextMouseUp(evt) {
+        if (evt.button == 0) {
+            leftDown = false;
+        } else if (evt.button == 1) {
+            middleDown = false;
+        } else if (evt.button == 2) {
+            rightdown = false;
+        }
+
+        if (leftDown || middleDown) return;
+
+        mouseUpTime = Date.now();
+
+        if (mouseDownTime != undefined &&
+            mouseContextTime != undefined &&
+            (mouseContextTime - mouseDownTime < (timeLimit/10)) &&
+            mouseUpTime - mouseDownTime < timeLimit) {
+            var downCoords = getPosition(evt);
+            if (Math.abs(downCoords.x - mouseDownX) <= jitterLimit &&
+                Math.abs(downCoords.y - mouseDownY) <= jitterLimit) {
+                angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'structure');
+                evt.preventDefault();
+                positionMenu(evt);
+            }
+        }
+    }
+
+    function handleContextMenu(evt) {
+        if (leftDown || middleDown) return;
+
+        mouseContextTime = Date.now();
+
+        var target = evt.currentTarget.id;
+        if (target == "treeDiv") {
+            // Tree
+            angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'structure');
+            evt.preventDefault();
+            positionMenu(evt);
+        } else if (target == "modelAnnotationsDiv") {
+            angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'modelAnnotations');
+            evt.preventDefault();
+            positionMenu(evt);
+        } else if (target == 'markupsDiv') {
+            angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'markup');
+            evt.preventDefault();
+            positionMenu(evt);
+        } else if (target == 'selinstancesDiv') {
+            angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'selinstances');
+            evt.preventDefault();
+            positionMenu(evt);
+        } else if (target == 'layersDiv') {
+            angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'layer');
+            evt.preventDefault();
+            positionMenu(evt);
+        } else if (target == 'spatialfilterDiv') {
+            angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'spatialfilter');
+            evt.preventDefault();
+            positionMenu(evt);
+        } else if (target == 'annotationsDiv') {
+            //angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'annotations');
+            evt.preventDefault();
+            positionMenu(evt);
+        } else if (target == 'propertiesDiv') {
+            angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'properties');
+            evt.preventDefault();
+            positionMenu(evt);
+        } else {
+            if (angular.element(document.getElementById('app')).scope().viewType == Module.ViewableType.ILLUSTRATION) { // Module.ViewableType.DOCUMENT
+                evt.preventDefault();
+                return;
+            }
+
+            // View
+            if (mouseDownTime != undefined &&
+                mouseUpTime != undefined &&
+                (mouseContextTime - mouseDownTime < timeLimit)) {
+                var downCoords = getPosition(evt);
+                if (Math.abs(downCoords.x - mouseDownX) <= jitterLimit &&
+                    Math.abs(downCoords.y - mouseDownY) <= jitterLimit) {
+                    if (angular.element(document.getElementById('app')).scope().view3D == true) {
+                        angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'view');
+                    } else {
+                        angular.element(document.getElementById('app')).scope().ShowContextMenu(true, 'document');
+                    }
+
+                    evt.preventDefault();
+                    positionMenu(evt);
+                }
+            }
+        }
+    }
+
+    function contextListener(id) {
+        var elm = document.getElementById(id);
+        elm.addEventListener("mousedown", function(e) {
+            handleContextMouseDown(e);
+        });
+        elm.addEventListener("mouseup", function(e) {
+            handleContextMouseUp(e);
+        });
+        elm.addEventListener("contextmenu", function(e) {
+            handleContextMenu(e);
+        });
+    }
+
+    function positionMenu(e) {
+        var clickCoords = getPosition(e);
+        var clickCoordsX = clickCoords.x;
+        var clickCoordsY = clickCoords.y;
+
+        var menu = document.querySelector("#context-menu");
+
+        var menuWidth = menu.offsetWidth + 4;
+        var menuHeight = menu.offsetHeight + 14;
+
+        var windowWidth = window.innerWidth;
+        var windowHeight = window.innerHeight;
+
+        if ( (windowWidth - clickCoordsX) < menuWidth ) {
+            menu.style.left = windowWidth - menuWidth + "px";
+        } else {
+            menu.style.left = clickCoordsX + "px";
+        }
+
+        if ( (windowHeight - clickCoordsY) < menuHeight ) {
+            menu.style.top = windowHeight - menuHeight + "px";
+        } else {
+            menu.style.top = clickCoordsY + "px";
+        }
+    }
+
+    function mouseWheelListener(id) {
+        let elm = document.getElementById(id);
+        elm.addEventListener("wheel", function(e) {
+            handleMouseWheel(e);
+        });
+    }
+
+    function handleMouseWheel(evt) {
+        var target = evt.currentTarget.id;
+        if (target == "headMenu" ||
+            target == "ribbonMenu") {
+            angular.element(document.getElementById('app')).scope().SelectRibbonMenu(evt.deltaY);
+            evt.preventDefault();
+        }
+    }
+
+    contextListener("parentVizDiv");
+    contextListener("treeDiv");
+    /*contextListener("modelAnnotationsDiv");
+    contextListener("markupsDiv");
+    contextListener("selinstancesDiv");
+    contextListener("layersDiv");
+    contextListener("spatialfilterDiv");
+    contextListener("annotationsDiv");
+    contextListener("propertiesDiv");
+
+    //mouseWheelListener("headMenu");
+    mouseWheelListener("ribbonMenu");*/
+
+</script>
+</body>
+</html>

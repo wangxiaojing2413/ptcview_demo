@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pva xmlns:mvs="http://www.ptc.com/productview/namespace/mvs" version="2.0">
+  <set name="Default">
+    <script>
+      <body>All State: Default<br/>-------------------<br/>Simplified Rep: DEFAULT REP<br/>Style State: DEFAULT STYLE<br/>Orientation: Default Orientation<br/></body>
+    </script>
+    <component>
+      <visible self="true" child="true"/>
+      <view name="DEFAULT" type="orthographic">
+        <orientation x="0.906402" y="-0.380364" z="0.183737" a="56.109614"/>
+        <pan x="0.038174" y="0.152886"/>
+        <viewport w="0.866701" h="0.731279"/>
+      </view>
+    </component>
+  </set>
+</pva>

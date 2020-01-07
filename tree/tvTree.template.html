@@ -1,0 +1,61 @@
+<div id="treeApp" style="height: 100%;" class="cellTree" ng-controller="tvTreeController">
+    <script type="text/ng-template" id="structureTree">
+        <div ng-if="IsValid(item)"
+             ng-style="GetTreeElementStyle(item)"
+             ng-click="$event.stopPropagation();">
+
+            <input id="{{GetId('COLLAPSE', item)}}"
+                   class="checkbox-collapse"
+                   type="checkbox"
+                   ng-if="GetChildrenSize(item)"
+                   ng-click="SetCollapseState($event, item)"
+                   ng-checked="GetExapandState(item)"/>
+            <label for="{{GetId('COLLAPSE', item)}}" class="checkbox-collapse-label noselect"></label>
+
+            <span ng-if="!GetChildrenSize(item)"
+                  ng-style="GetEmptySpanStyle()"
+                  ng-click="ClearNodeSelection()"
+                  class="noselect"></span>
+
+            <input ng-class="GetChildrenSize(item) ? 'checkbox-assembly' : 'checkbox-instance'"
+                   type="checkbox"
+                   id="{{GetId('UID', item)}}"
+                   ng-if="GetUID(item)"
+                   ng-click="SetCheckState($event, item)"
+                   ng-checked="GetCheckState(item)" />
+            <label for="{{GetId('UID', item)}}"
+                   ng-class="GetChildrenSize(item) ? 'checkbox-assembly-label noselect' : 'checkbox-instance-label noselect'"></label>
+
+            <img ng-click="TreeNodeClicked($event, item)"
+                 ng-dblclick="TreeNodeDblClicked($event, item)"
+                 ng-src="{{GetIconSrc(item)}}"
+                 ng-style="GetIconStyle()"
+                 class="noselect" />
+
+            <span ng-click="TreeNodeClicked($event, item)"
+                  ng-dblclick="TreeNodeDblClicked($event, item)"
+                  ng-style="GetLabelStyle(item)"
+                  class="noselect"
+                  title="{{GetMarkupId(item)}}"
+                  id="{{'SUID'+item.uid}}"
+                  draggable ="{{GetItemDraggable(item)}}"
+                  ondragstart="OnDragStart(event)"
+                  ondragenter="OnDragEnter(event)"
+                  ondragover="OnDragOver(event)"
+                  ondrop="OnDrop(event)">
+                  {{GetNodeName(item)}}
+            </span>
+        </div>
+        <ul ng-if="GetChildrenSize(item)">
+            <li ng-repeat="item in item.children"
+                ng-include="'structureTree'"
+                ng-style="GetLiStyle(item)">
+            </li>
+        </ul>
+    </script>
+    <ul class="tree">
+        <li ng-repeat="item in uiTree"
+            ng-include="'structureTree'">
+        </li>
+    </ul>
+</div>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pva xmlns:mar="http://www.ptc.com/productview/namespace/mar" version="2.0">
+  <set name="REP0001">
+    <component>
+      <visible self="true" child="true"/>
+      <component id="39">
+        <visible self="false" child="false"/>
+      </component>
+    </component>
+  </set>
+</pva>

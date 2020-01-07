@@ -1,0 +1,278 @@
+{
+    "ParseNode" : {
+        "Type" : "root",
+        "Name" : "",
+        "Value" : "",
+        "Locked" : false,
+        "Children" : [
+            {
+                "Type" : "category",
+                "Name" : "Startup",
+                "Value" : "",
+                "Locked" : false,
+                "Children" : [
+                    {
+                        "Type" : "preference",
+                        "Name" : "Enable item lists",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Enable markups",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Enable measurements",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+					{
+                        "Type" : "preference",
+                        "Name" : "Enable construction geometry",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Transition animation duration",
+                        "Value" : "700",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Enable section cuts",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Hide proe markups",
+                        "Value" : "false",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Pvk system properties",
+                        "Value": "CalcEachTime",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Enable feature manager",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Use adv selection manager",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type": "preference",
+                        "Name": "Enable screen space dragger",
+                        "Value": "true",
+                        "Locked": false
+                    }
+                ]
+            },
+            {
+                "Type" : "category",
+                "Name" : "Loader",
+                "Value" : "",
+                "Locked" : false,
+                "Children" : [
+                    {
+                        "Type" : "preference",
+                        "Name" : "Load pvs properties",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Illustration unload parts",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Render while loading",
+                        "Value" : "markups only if nothing loaded",
+                        "Locked" : false
+                    }
+                ]
+            },
+            {
+                "Type" : "category",
+                "Name" : "Session",
+                "Value" : "",
+                "Locked" : false,
+                "Children" : [
+                    {
+                        "Type" : "preference",
+                        "Name" : "Clear unused shapes on destruction",
+                        "Value" : "true",
+                        "Locked" : false
+                    }
+                ]
+            },
+            {
+                "Type" : "category",
+                "Name" : "Shape Scene",
+                "Value" : "",
+                "Locked" : false,
+                "Children" : [
+                    {
+                        "Type" : "preference",
+                        "Name" : "Default LOD",
+                        "Value" : "-1",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Transition override inherit behaviour",
+                        "Value" : "false",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Zoom on load",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type": "preference",
+			"Name": "Display sequence label",
+			"Value": "true",
+			"Locked": false
+			},
+			{
+			"Type": "preference",
+                        "Name": "Hidden items are unpickable",
+                        "Value": "true",
+                        "Locked": false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Picking on Phantom",
+                        "Value" : "true",
+                        "Locked" : false
+                    },
+                    {
+                        "Type": "preference",
+                        "Name": "Disable sbom selection",
+                        "Value": "false",
+                        "Locked": false
+                    },
+                    {
+                        "Type": "preference",
+                        "Name": "Merge appearances in animations",
+                        "Value": "false",
+                        "Locked": false
+                    }
+                ]
+            },
+            {
+                "Type" : "category",
+                "Name" : "Shape View",
+                "Value" : "",
+                "Locked" : false,
+                "Children" : [
+                    {
+                        "Type" : "preference_list",
+                        "Name" : "Default background color",
+                        "Locked" : false,
+                        "Children" : [
+                            {
+                                "Type" : "preference_item",
+                                "Children" : [
+                                    {
+                                        "Type" : "preference",
+                                        "Name" : "Top",
+                                        "Value": "0",
+                                        "Locked" : false
+                                    },
+                                    {
+                                        "Type" : "preference",
+                                        "Name" : "Bottom",
+                                        "Value": "16777215",
+                                        "Locked" : false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Default floor size",
+                        "Value" : "0.4",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference_list",
+                        "Name" : "Default view orientation",
+                        "Locked" : false,
+                        "Children" : [
+                            {
+                                "Type" : "preference_item",
+                                "Children" : [
+                                    {
+                                        "Type" : "preference",
+                                        "Name" : "DegX",
+                                        "Value" : "-30",
+                                        "Locked" : false
+                                    },
+                                    {
+                                        "Type" : "preference",
+                                        "Name" : "DegY",
+                                        "Value" : "45",
+                                        "Locked" : false
+                                    },
+                                    {
+                                        "Type" : "preference",
+                                        "Name" : "DegZ",
+                                        "Value" : "0",
+                                        "Locked" : false
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Generation mode",
+                        "Value" : "best fit",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Projection mode",
+                        "Value" : "perspective",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Orthographic view width",
+                        "Value" : "1.0",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Perspective HFOV",
+                        "Value" : "60.0",
+                        "Locked" : false
+                    },
+                    {
+                        "Type" : "preference",
+                        "Name" : "Use color phantom",
+                        "Value" : "false",
+                        "Locked" : false
+                    }
+                ]
+            }
+        ]
+    }
+}

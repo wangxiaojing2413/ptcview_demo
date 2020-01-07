@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pva xmlns:mvs="http://www.ptc.com/productview/namespace/mvs" version="2.0">
+  <set name="COMB0001">
+    <script>
+      <body>All State: COMB0001<br/>-------------------<br/>Simplified Rep: REP0001<br/>Style State: Master Style<br/>Section: No Cross Section<br/>Orientation: VIEW0001<br/></body>
+    </script>
+    <component>
+      <visible self="true" child="true"/>
+      <view name="VIEW0001" type="orthographic">
+        <orientation x="-0.009221" y="0.673714" z="0.738934" a="179.205703"/>
+        <pan x="-0.058283" y="-0.109365"/>
+        <viewport w="0.704059" h="0.594049"/>
+      </view>
+      <component id="39">
+        <visible self="false" child="false"/>
+      </component>
+    </component>
+  </set>
+</pva>

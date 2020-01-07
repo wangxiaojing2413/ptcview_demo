@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="PTC">
+    <title>Creo View WebGL Viewer</title>
+</head>
+<script src="js/ptc/thingview/thingview.js"></script>
+<script type="text/javascript">
+    var app;
+    var session;
+    var model;
+    window.onload = function () {
+        ThingView.init("js/ptc/thingview", function () {
+                console.log("Creo View WebGL Viewer is now initialised");
+                app = ThingView.CreateCVApplication("CreoViewWebGLDiv");
+                session = app.GetSession();
+                // structure = session.LoadStructureWithURL("sample-data/Fishing_Reel/fishing_reel.pvs", true, function (success, errors) {
+                structure = session.LoadStructureWithURL("sample-data/Brake/worldcar-brake-multi-figure.pvz", true, function (success, errors) {
+                    var shapeScene = session.MakeShapeScene(true);
+                    var shapeView = shapeScene.MakeShapeView(document.getElementById("CreoViewWebGLDiv").childNodes[0].id, true);
+                    model = shapeScene.MakeModel();
+                    model.LoadStructure(structure, true, true, function (success, isStructure, errorStack) {
+                        console.log("Model LoadFromURLWithCallback - success: " + success + ", isStructure: " + isStructure);
+                    });
+                    var json_string = '{"primaryNode":"3","selectedNodes":null}';
+                    session.SelectTreeNodes(json_string, true);
+                });
+        });
+    };
+</script>
+
+<body style="height: 100%; margin: 0px;">
+    <div id="CreoViewWebGLDiv" style="width: 95%;height: 95%;border:0; margin: auto"></div>
+</body>
+
+</html>
