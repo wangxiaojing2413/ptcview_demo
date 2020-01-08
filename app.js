@@ -104,7 +104,7 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
         'backgroundTopHexColor':'#000000FF',
         'backgroundBottomHexColor':'#FFFFFFFF',
         'shapeFilters':0x00300007,
-        'selectionLogging':'NO',
+        'selectionLogging':'YES',
         'navMode': 'CreoView',
         'selectHighlightStyle': 'FILL',
         'selectHighlightWidth': 5.0,
@@ -2745,8 +2745,28 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
             },
             OnTreeAddEnd: function () {
                 $scope.ParseTreeAddMessage($scope.jsonMessage);
-                console.log($scope.jsonMessage)
-                $scope.jsonMessage = [];
+                //$scope.jsonMessage = [];
+                // setTimeout($scope.session.SelectTreeNodes('{"primaryNode":"3","selectedNodes":null}', true),5000)
+                $scope.DelayedApply(100, function() {
+                    // $scope.session.SelectTreeNodes('{"primaryNode":"3","selectedNodes":null}', true);
+                   /* $scope.model.RemoveAllShapeInstances();
+                    var idPathArr = new Module.VectorString();
+                    idPathArr.push_back('/1/15');
+                    $scope.model.LoadParts(idPathArr, true, function(result) {
+                        if (result == true) {
+                            $scope.shapeView.ZoomView(Module.ZoomMode.ZOOM_ALL, 0);
+                        }
+                    });*/
+                    /*var idPathArr = new Module.VectorString();
+                    console.log(idPathArr)
+                    idPathArr.push_back('/');
+                    $scope.model.LoadParts(idPathArr, true, function(result) {
+                        if (result == true) {
+                            $scope.shapeView.ZoomView(Module.ZoomMode.ZOOM_ALL, 0);
+                        }
+                    });*/
+                    //$scope.session.SelectTreeNodes('{"primaryNode":"2","selectedNodes":null}', true);
+                });
                 $scope.$apply();
             },
             OnTreeRemoveBegin: function () {
@@ -2767,11 +2787,13 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
                 $scope.jsonMessage.push(message);
             },
             OnTreeUpdateEnd: function() {
-                /*$scope.ParseTreeUpdateMessage($scope.jsonMessage);
-                alert($scope.jsonMessage)
+                $scope.ParseTreeUpdateMessage($scope.jsonMessage);
+                console.log($scope.jsonMessage)
                 $scope.jsonMessage = [];
                 $scope.ApplyNodeSelectionList();
-                $scope.$apply();*/
+                $scope.$apply();
+                //$scope.session.SelectTreeNodes('{"primaryNode":"3","selectedNodes":null}', true)
+                $scope.$apply();
             }
         });
 
@@ -2848,6 +2870,17 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
                     }
                 }
 
+                ///
+                //window.open('http://localhost/simple-example.html?idpathArr=' + idPathArr,'_blank');
+                //$scope.model.RemoveAllShapeInstances();
+                //idPathArr.push_back('/1/1');
+                /*$scope.model.LoadParts(idPathArr, true, function(result) {
+                    if (result == true) {
+                        $scope.shapeView.ZoomView(Module.ZoomMode.ZOOM_ALL, 0);
+                    }
+                });*/
+                ///
+
                 $scope.UpdateSelectionList();
                 $scope.UpdateTreeSelection();
                 $scope.SafeApply(function() {
@@ -2907,13 +2940,32 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
         });
 
         $scope.ModelLoadComplete = function() {
-            $scope.loadTime = $scope.GetLoadTime();
+            /*$scope.loadTime = $scope.GetLoadTime();
             $scope.StopTimer();
-            $scope.loadState = "Loaded";
+            $scope.loadState = "Loaded";*/
         };
 
         $scope.StructuerLoadComplete = function() {
-           /* $scope.modelLocation = $scope.model.GetLocation();
+            console.log(window.parent.gloableIdPath)
+            var idPathArray = window.parent.gloableIdPath;
+            $scope.model.RemoveAllShapeInstances();
+            var idPathArr = new Module.VectorString();
+            if(idPathArray){
+                for(var i=0;i<idPathArray.length;i++){
+                    var tempIdPathStr = idPathArray[i];
+                    console.log(tempIdPathStr)
+                    idPathArr.push_back(tempIdPathStr);
+                }
+            }
+            //idPathArr = window.parent.gloableIdPath
+            //console.log(idPathArr)
+            //idPathArr.push_back('/1/1');
+            $scope.model.LoadParts(idPathArr, true, function(result) {
+                if (result == true) {
+                    $scope.shapeView.ZoomView(Module.ZoomMode.ZOOM_ALL, 0);
+                }
+            });
+            /*$scope.modelLocation = $scope.model.GetLocation();
             $scope.loadedIllustration = "-";
             $scope.viewablesModelDisplay = true;
             $scope.viewablesFiguresDisplay = true;
@@ -2927,11 +2979,11 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
             $scope.PopulateViewOrientations();
             $scope.PopulateModelAnnotations();
             $scope.PopulateLayers();
-            $scope.GetProjectionMode();
+            $scope.GetProjectionMode();*/
             $scope.RegisterTreeObserver();
-            $scope.RegisterSelectionObserver();
+            // $scope.RegisterSelectionObserver();
 
-            $scope.model.SetSequenceEventCallback(function(playstate, stepInfo, playpos){
+            /*$scope.model.SetSequenceEventCallback(function(playstate, stepInfo, playpos){
                 $scope.HandleSequenceStepResult(playstate, stepInfo, playpos);
                 $scope.$apply();
             });
@@ -2970,8 +3022,6 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
             $scope.model.SetSelectionCallback(function(type, si, idPath, selected, selType){
                 // $scope.$apply();
             });*/
-            json_string = '{"primaryNode":"3","selectedNodes":null}';
-            $scope.session.SelectTreeNodes(json_string, true);
 
             $scope.$apply();
         };
@@ -6513,10 +6563,9 @@ tvModule.directive('tview', function($timeout) {
                     $scope.SetSelectionColor(false);
                     $scope.SetInertialSpinDecayRate();
                     $scope.showSpinner = false;
-                    alert(222)
                     $scope.LoadModel("sample-data/Brake/worldcar-brake-multi-figure.pvz");
 
-                    //$scope.$apply();
+                    $scope.$apply();
                 });
             });
         }

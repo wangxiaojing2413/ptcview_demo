@@ -10,7 +10,7 @@
 <script src="js/angular.min.js"></script>
 <script src="js/ptc/thingview/thingview.js"></script>
 <script src="tree/tvTree.module.js"></script>
-<script src="app.js"></script>
+<script src="app_bakup.js"></script>
 
 <div id="app" ng-controller="ThingViewController" ng-init="sessionId='view1'" ng-click="HideAllMenu()">
     <div id="headMenu" class="table widthLayout" ng-show="showOnlyGraphics === 'NO'">
@@ -1507,6 +1507,16 @@
             <span class="dialog-button" ng-click="HideLeaderLinePropertiesDialog(false)">Cancel</span>
         </div>
     </div>
+    <div id="newFrameDialog" class="dialog-box" style="width: 1000px; height: 720px;">
+        <h3 id="newFrameDialogTitle" class="dialog-title">component demo</h3>
+        <div class="dialog-close" ng-click="HideFrameDialog(false)">&times;</div>
+        <div class="dialog-content" style="width: 97%; height: auto;">
+            <iframe id='internelFrame' src="" style="width: 100%; height: 100%;"></iframe>
+        </div>
+        <div class="dialog-action">
+            <span class="dialog-button" ng-click="HideFrameDialog(false)">Cancel</span>
+        </div>
+    </div>
 
     <div id="shapeFiltersDlgBox" class="dialog-box" style="width: 450px; height: 400px;">
         <h3 id="shapeFiltersDlgBoxTitle" class="dialog-title">Shape Filters</h3>
@@ -1804,6 +1814,7 @@
 </div>
 
 <script>
+    var gloableIdPath = new Array();
 var dropbox;
 
 window.onload = function() {

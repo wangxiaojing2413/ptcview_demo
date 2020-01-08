@@ -79,7 +79,6 @@ angular.
             var updates = [];
             for (var i = 0; i < messageArr.length; i++) {
                 var message_obj = JSON.parse(messageArr[i]);
-                console.log(message_obj)
 
                 if (message_obj.treeMapping) {
                     for (var v=0;v<message_obj.treeMapping.length;++v) {
@@ -854,7 +853,6 @@ angular.
         }
 
         $scope.TreeNodeClicked = function(event, item) {
-            console.log(item)
             if ($scope.tvTree) { // structure
                 var node = $scope.uidMap[item.uid];
                 if (node != undefined) {
@@ -1043,11 +1041,8 @@ angular.
                 }
 
                 var json_string = JSON.stringify(json_obj);
-                console.log(json_string)
-                //json_string = '{"primaryNode":"3","selectedNodes":null}';
+
                 $scope.session.SelectTreeNodes(json_string, true);
-                /*console.log(json_string)
-                window.open('http://localhost/simple-example.html','_blank');*/
                 // if ($scope.showProgress == "YES") {
                 //     $scope.timer = $timeout(function () {
                 //         $scope.session.ShowProgress(true);

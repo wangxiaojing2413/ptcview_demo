@@ -1403,9 +1403,9 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
             $scope.currentDocument = null;
             $scope.RemoveAllBoundingMarker();
             $scope.RemoveLeaderlines();
-            $scope.LoadIllustration();
-            $scope.shapeScene.ShowFloor(false, 0x505050E0, 0xE0E0E0E0);
-            $scope.shapeScene.RemoveAllCVMarkups(Module.CV_MARKUP_TYPES.CVMARKUPTYPE_ALL);
+            //$scope.LoadIllustration();
+            //$scope.shapeScene.ShowFloor(false, 0x505050E0, 0xE0E0E0E0);
+            //$scope.shapeScene.RemoveAllCVMarkups(Module.CV_MARKUP_TYPES.CVMARKUPTYPE_ALL);
             $scope.shapeScene.RemoveSectionCut();
             $scope.model.ResetToPvkDefault();
             $scope.model.RemoveAllShapeInstances();
@@ -2830,9 +2830,11 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
 
                     }
                 }
-
+                var idPathArray = new Module.VectorString();
                 for (let i=0;i<added.size();++i) {
                     var idpath = added.get(i);
+                    //idPathArray.push_back(idpath);
+                    gloableIdPath.push(idpath);//
                     var fullIdpath = PrependModelId(idpath);
 
                     let id = $scope.selection.indexOf(fullIdpath);
@@ -2845,6 +2847,10 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
                         $scope.nodeSelection.push(fullIdpath);
                     }
                 }
+                //gloableIdPath = idPathArray;
+                console.log(gloableIdPath)
+                //window.open('http://localhost/simple-example.html','_blank');
+                $scope.ShowFrameDialog();
 
                 $scope.UpdateSelectionList();
                 $scope.UpdateTreeSelection();
@@ -3865,6 +3871,7 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
         document.getElementById($scope.dialogId).style.display = "block";
         document.getElementById($scope.dialogId).style.top = "10%";
         document.getElementById($scope.dialogId).style.left = "20%";
+        document.getElementById("internelFrame").src="simple-example.html";
         document.getElementById($scope.dialogTitleId).onmousedown = function() {
             _dialog_drag_init(this.parentNode);
             return false;
@@ -4293,6 +4300,19 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
             $scope.dialogTitleId = "leaderLinePropertiesDlgBoxTitle";
             $scope.showDialog();
         }
+    }
+
+
+    $scope.ShowFrameDialog = function() {
+        if ($scope.dialogId == "" && $scope.dialogTitleId == "") {
+            $scope.dialogId = "newFrameDialog";
+            $scope.dialogTitleId = "newFrameDialogTitle";
+            $scope.showDialog();
+        }
+    }
+
+    $scope.HideFrameDialog = function(save) {
+        $scope.hideDialog();
     }
 
     $scope.HideLeaderLinePropertiesDialog = function(save) {
