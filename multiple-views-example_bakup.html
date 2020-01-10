@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en " style="height: 100%">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="PTC">
+    <title>Creo View WebGL Viewer</title>
+</head>
+<script src="js/ptc/thingview/thingview.js"></script>
+<script type="text/javascript">
+    var thingview;
+    var app1;
+    var app2;
+    var session1;
+    var session2;
+    var structure1;
+    var structure2;
+    var model1;
+    var model2;
+    window.onload = function () {
+        ThingView.init("js/ptc/thingview", function () { // ThingView should only be initialised once per frame
+            // Add drag and drop support to load pvz
+            var canvas1 = document.getElementById("CreoViewWebGLDiv1");
+            canvas1.addEventListener("dragenter", dragenter, false);
+            canvas1.addEventListener("dragover", dragover, false);
+            canvas1.addEventListener("drop", drop, false);
+
+            console.log("Creo View WebGL Viewer is now initialised");
+            app1 = ThingView.CreateCVApplication("CreoViewWebGLDiv1"); // A session must be created for each location ThingView is embedded
+            session1 = app1.GetSession();
+            structure1 = session1.LoadStructureWithURL("sample-data/000-ktm-rc8.pvz", true, function (success, errors) {
+                if (success === true) {
+                    shapeScene1 = session1.MakeShapeScene(true);
+                    shapeView1 = shapeScene1.MakeShapeView(document.getElementById("CreoViewWebGLDiv1").childNodes[0].id, true);
+                    model1 = shapeScene1.MakeModel();
+                    model1.LoadStructure(structure1, true, true, function (success, isStructure, errorStack) {
+                        model1.RemoveAllShapeInstances();
+                        var idPathArr = new Module.VectorString();
+                        idPathArr.push_back('/52/7679/2742/8040');
+                        model1.LoadParts(idPathArr, true, function(result) {
+                        });
+                        console.log("Model(1) LoadFromURLWithCallback - success: " + success + ", isStructure: " + isStructure);
+                    });
+                }
+            })
+
+        });
+    };
+
+    function dragenter(e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    function dragover(e) {
+        e.stopPropagation();
+        e.preventDefault();
+    }
+    function drop(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        var dt = e.dataTransfer;
+        if (dt.files.length !== 1)
+            return;
+        var file = dt.files[0];
+        if (file == undefined)
+            return;
+        var reader = new FileReader();
+        reader.filename = file.name;
+        reader.onload = function () {
+            var arrayBuffer = reader.result;
+            if (e.target.id.indexOf("CreoViewWebGLDiv1") == 0) {
+                session1.RemoveAllLoadSources();
+                structure1 = session1.LoadStructureWithDataSource(reader.filename, arrayBuffer, true, function (success, errors) {
+                    if (success === true) {
+                        model1 = shapeScene1.MakeModel();
+                        model1.LoadStructure(structure1, true, true, function (success, isStructure, errorStack) {
+                            console.log("Model(1) LoadStructure - success: " + success + ", isStructure: " + isStructure);
+                        });
+                    }
+                })
+            } else {
+                session2.RemoveAllLoadSources();
+                structure2 = session2.LoadStructureWithDataSource(reader.filename, arrayBuffer, true, function (success, errors) {
+                    if (success === true) {
+                        model2 = shapeScene2.MakeModel();
+                        model2.LoadStructure(structure2, true, true, function (success, isStructure, errorStack) {
+                            console.log("Model(2) LoadStructure - success: " + success + ", isStructure: " + isStructure);
+                        });
+                    }
+                })
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+</script>
+
+<body style="height: 100%; margin: 0px">
+    <div style="width: 100%; height: 100%; overflow: hidden;">
+        <div id="CreoViewWebGLDiv1" style="width: 45%;height: 80%;border:0; float: left"></div>
+    </div>
+</body>
+
+</html>
