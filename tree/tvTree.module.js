@@ -93,7 +93,7 @@ angular.
                 updates.sort(function(a, b) {
                     return parseInt(a.id, 10) - parseInt(b.id, 10);
                 });
-                $scope.AddInstances(updates);
+                $scope.AddInstances(updates);//初始化idpathMap中数据
             }
         }
 
@@ -289,6 +289,7 @@ angular.
                 //var strippedIdpath = $scope.StripModelIdFromIdPath(idpath);
                 var modelId = GetModelId(idpath);
                 $scope.SetCurrentModel(modelId);
+                debugger;
                 if ($scope.structure) {
                     //var name = $scope.structure.GetInstanceName(strippedIdpath)
                     var fullIdpath = PrependModelId(idpath, $scope.model.id);
@@ -1261,6 +1262,7 @@ Tree.prototype.UpdateNodeVisiblity = function(node, vis) {
 }
 
 Tree.prototype.AddNode = function(data) {
+    //alert(22222)
     var scope = angular.element(document.getElementById('app')).scope();
 
     var child = new Node(data),

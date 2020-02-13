@@ -2462,7 +2462,7 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
         $scope.loadTime = 0;
         if (url || $scope.modelParams.url) {
             if ($scope.MyModelClass == undefined) {
-                $scope.ExtendClassInterface();
+                $scope.ExtendClassInterface();//扩展插件树组件事件处理函数
             }
 
             $scope.loadState = "Loading";
@@ -2499,7 +2499,7 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
                     function(success, isStructure, errorStack){
                         if (success === true) {
                             if (isStructure === true) {
-                                $scope.StructuerLoadComplete();
+                                $scope.StructuerLoadComplete();//模型加载完毕处理函数，注册树组件观察者对象（$scope.ExtendClassInterface();//扩展插件树组件事件处理函数）
                             } else {
                                 $scope.ModelLoadComplete();
                             }
@@ -2736,15 +2736,15 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
             }
         });
 
-        $scope.MyTreeClass = Module.TreeEvents.extend("TreeEvents", {
+        $scope.MyTreeClass = Module.TreeEvents.extend("TreeEvents", {//树组件观察者对象，处理结构树中的事件
             OnTreeAddBegin: function () {
                 $scope.jsonMessage = [];
             },
             OnTreeAdd: function (message) {
-                $scope.jsonMessage.push(message);
+                $scope.jsonMessage.push(message);//添加模型中数据
             },
             OnTreeAddEnd: function () {
-                $scope.ParseTreeAddMessage($scope.jsonMessage);
+                $scope.ParseTreeAddMessage($scope.jsonMessage);//处理模型中数据
                 $scope.jsonMessage = [];
                 $scope.$apply();
             },
@@ -2932,7 +2932,7 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
             $scope.PopulateModelAnnotations();
             $scope.PopulateLayers();
             $scope.GetProjectionMode();
-            $scope.RegisterTreeObserver();
+            $scope.RegisterTreeObserver();//注册树组件观察者对象（$scope.MyTreeClass）
             $scope.RegisterSelectionObserver();
 
             $scope.model.SetSequenceEventCallback(function(playstate, stepInfo, playpos){
@@ -5239,14 +5239,15 @@ tvModule.controller("ThingViewController", function($scope, $timeout, $interval,
         return (elapsedTime);
     }
 
-    $scope.OpenModel = function(input) {
+    $scope.OpenModel = function(input) {//打开pvz文件
+        debugger
         if (input.files[0]) {
             var file = input.files[0];
             var reader = new FileReader();
             reader.filename = file.name;
             reader.onload = function () {
                 var arrayBuffer = reader.result;
-                angular.element(document.getElementById('app')).scope().LoadModel(reader.filename, arrayBuffer);
+                angular.element(document.getElementById('app')).scope().LoadModel(reader.filename, arrayBuffer);//LoadModel函数加载模型
                 storeDataSet(file.name, arrayBuffer);
             }
             reader.readAsArrayBuffer(file);
